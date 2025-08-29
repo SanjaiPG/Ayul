@@ -21,7 +21,7 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
       bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(8),
+        padding: const EdgeInsets.all(13),
         child: Container(
           decoration: BoxDecoration(
             color: const Color.fromARGB(40, 0, 0, 0).withOpacity(0.3),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'starAnimation.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -14,24 +15,19 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       extendBody: true,
-      body: Center(
-        child: Text(
-          "Page $_selectedIndex",
-          style: const TextStyle(fontSize: 24),
-        ),
-      ),
+      body: StarsAnimationScreen(),
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(13),
         child: Container(
           decoration: BoxDecoration(
-            color: const Color.fromARGB(40, 0, 0, 0).withOpacity(0.3),
+            color: const Color.fromARGB(40, 63, 60, 60).withOpacity(0.3),
             borderRadius: BorderRadius.circular(30),
           ),
           child: BottomNavigationBar(
             backgroundColor: Colors.transparent,
             elevation: 0,
             selectedItemColor: Colors.white,
-            unselectedItemColor: const Color.fromARGB(255, 212, 212, 212),
+            unselectedItemColor: const Color.fromARGB(255, 106, 106, 106),
             type: BottomNavigationBarType.fixed,
             currentIndex: _selectedIndex,
             onTap: (index) {

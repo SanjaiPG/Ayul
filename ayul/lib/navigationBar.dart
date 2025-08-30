@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'starAnimation.dart';
+import 'package:iconsax/iconsax.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -48,7 +49,7 @@ class _HomePageState extends State<HomePage> {
                     scale: _selectedIndex == 0 ? 1.3 : 1.0,
                     duration: const Duration(milliseconds: 300),
                     curve: Curves.easeOut,
-                    child: const Icon(Icons.auto_graph),
+                    child: const Icon(Iconsax.activity),
                   ),
                   label: "Graph",
                 ),

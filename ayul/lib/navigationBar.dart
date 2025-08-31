@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'starAnimation.dart';
 import 'package:iconsax/iconsax.dart';
+import 'starAnimation.dart';
+import 'search.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -17,13 +18,26 @@ class _HomePageState extends State<HomePage> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        splashColor: Colors.transparent, // remove ripple effect
-        highlightColor: Colors.transparent, // remove highlight effect
-        hoverColor: Colors.transparent, // optional
+        splashColor: Colors.transparent,
+        highlightColor: Colors.transparent,
+        hoverColor: Colors.transparent,
       ),
       home: Scaffold(
         extendBody: true,
-        body: const StarsAnimationScreen(),
+        body: Stack(
+          children: [
+            const StarsAnimationScreen(),
+
+            IndexedStack(
+              index: _selectedIndex,
+              children: const [
+                Center(child: Text("")),
+                SearchPage(),
+                Center(child: Text("")),
+              ],
+            ),
+          ],
+        ),
         bottomNavigationBar: Padding(
           padding: const EdgeInsets.all(13),
           child: Container(
@@ -69,7 +83,7 @@ class _HomePageState extends State<HomePage> {
                     curve: Curves.easeOut,
                     child: const Icon(Icons.book),
                   ),
-                  label: "Book",
+                  label: "Books",
                 ),
               ],
             ),

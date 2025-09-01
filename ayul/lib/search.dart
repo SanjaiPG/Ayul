@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'content.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
@@ -132,6 +133,15 @@ class _SearchPageState extends State<SearchPage> {
                               _results[index],
                               style: const TextStyle(color: Colors.white),
                             ),
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      DetailPage(itemName: _results[index]),
+                                ),
+                              );
+                            },
                           );
                         },
                       ),

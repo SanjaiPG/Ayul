@@ -549,9 +549,8 @@ class AppTheme {
   /// Helper method to build text theme optimized for medical content
   static TextTheme _buildTextTheme({required bool isLight}) {
     final Color textPrimary = isLight ? textPrimaryLight : textPrimaryDark;
-    final Color textSecondary = isLight
-        ? textSecondaryLight
-        : textSecondaryDark;
+    final Color textSecondary =
+        isLight ? textSecondaryLight : textSecondaryDark;
 
     return TextTheme(
       // Display styles for major headings

@@ -80,9 +80,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   void _setupConnectivityListener() {
-    Connectivity()
-        .onConnectivityChanged
-        .listen((ConnectivityResult result) {
+    Connectivity().onConnectivityChanged.listen((ConnectivityResult result) {
       setState(() {
         _isOffline = result == ConnectivityResult.none;
       });
@@ -199,9 +197,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                _currentLanguage == 'EN'
-                    ? 'Siddha Acu Edu'
-                    : 'சித்த குத்தூசி கல்வி',
+                _currentLanguage == 'EN' ? 'Ayul' : 'ஆயுள்',
                 style: TextStyle(
                   fontSize: 20.sp,
                   fontWeight: FontWeight.w700,

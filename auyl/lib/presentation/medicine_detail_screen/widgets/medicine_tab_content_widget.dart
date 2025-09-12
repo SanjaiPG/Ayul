@@ -31,148 +31,140 @@ class MedicineTabContentWidget extends StatelessWidget {
     }
   }
 
+  // Each tab builder uses a ListView for consistent scrolling behavior.
   Widget _buildOverviewTab() {
-    return SingleChildScrollView(
-      padding: EdgeInsets.all(4.w),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Description
-          _buildSectionHeader('Description'),
-          SizedBox(height: 1.h),
-          Text(
-            medicineData['description'] ?? 'No description available.',
-            style: AppTheme.lightTheme.textTheme.bodyLarge?.copyWith(
-              height: 1.6,
-              color: AppTheme.lightTheme.colorScheme.onSurface,
-            ),
+    return ListView(
+      padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
+      children: [
+        _buildSectionHeader('Description'),
+        SizedBox(height: 1.h),
+        Text(
+          medicineData['description'] ?? 'No description available.',
+          style: AppTheme.lightTheme.textTheme.bodyLarge?.copyWith(
+            height: 1.6,
+            color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
           ),
-
-          SizedBox(height: 3.h),
-
-          // Properties
-          _buildSectionHeader('Properties'),
+        ),
+        SizedBox(height: 3.h),
+        _buildSectionHeader('Properties'),
+        SizedBox(height: 1.h),
+        _buildPropertiesCard(),
+        SizedBox(height: 3.h),
+        if (medicineData['scientificName'] != null) ...[
+          _buildSectionHeader('Scientific Classification'),
           SizedBox(height: 1.h),
-          _buildPropertiesGrid(),
-
-          SizedBox(height: 3.h),
-
-          // Scientific Classification
-          if (medicineData['scientificName'] != null) ...[
-            _buildSectionHeader('Scientific Classification'),
-            SizedBox(height: 1.h),
-            _buildInfoCard('Scientific Name', medicineData['scientificName']),
-            if (medicineData['family'] != null)
-              _buildInfoCard('Family', medicineData['family']),
-            if (medicineData['parts_used'] != null)
-              _buildInfoCard('Parts Used', medicineData['parts_used']),
-          ],
+          _buildInfoCard(
+              'biotech', 'Scientific Name', medicineData['scientificName']),
+          if (medicineData['family'] != null)
+            _buildInfoCard('family_restroom', 'Family', medicineData['family']),
+          if (medicineData['parts_used'] != null)
+            _buildInfoCard('grass', 'Parts Used', medicineData['parts_used']),
         ],
-      ),
+      ],
     );
   }
 
   Widget _buildUsageTab() {
-    return SingleChildScrollView(
-      padding: EdgeInsets.all(4.w),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Dosage
-          _buildSectionHeader('Dosage'),
-          SizedBox(height: 1.h),
-          _buildDosageCard(),
-
-          SizedBox(height: 3.h),
-
-          // Preparation
-          _buildSectionHeader('Preparation Instructions'),
-          SizedBox(height: 1.h),
-          _buildPreparationSteps(),
-
-          SizedBox(height: 3.h),
-
-          // Administration
-          _buildSectionHeader('Administration'),
-          SizedBox(height: 1.h),
-          _buildAdministrationInfo(),
-        ],
-      ),
+    return ListView(
+      padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
+      children: [
+        _buildSectionHeader('Dosage'),
+        SizedBox(height: 1.h),
+        _buildDosageCard(),
+        SizedBox(height: 3.h),
+        _buildSectionHeader('Preparation Instructions'),
+        SizedBox(height: 1.h),
+        _buildPreparationSteps(),
+        SizedBox(height: 3.h),
+        _buildSectionHeader('Administration'),
+        SizedBox(height: 1.h),
+        _buildAdministrationInfo(),
+      ],
     );
   }
 
   Widget _buildDiseasesTab() {
     final relatedDiseases = medicineData['relatedDiseases'] as List? ?? [];
-
-    return relatedDiseases.isEmpty
-        ? Center(
-            child: Padding(
-              padding: EdgeInsets.all(4.w),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CustomIconWidget(
-                    iconName: 'medical_services',
-                    color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
-                    size: 48,
-                  ),
-                  SizedBox(height: 2.h),
-                  Text(
-                    'No related diseases found',
-                    style: AppTheme.lightTheme.textTheme.titleMedium?.copyWith(
-                      color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
+    if (relatedDiseases.isEmpty) {
+      // Updated empty state design
+      return Center(
+        child: Padding(
+          padding: EdgeInsets.all(8.w),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircleAvatar(
+                radius: 12.w,
+                backgroundColor: AppTheme.lightTheme.colorScheme.surfaceVariant,
+                child: CustomIconWidget(
+                  iconName: 'vaccines',
+                  color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+                  size: 48,
+                ),
               ),
-            ),
-          )
-        : ListView.builder(
-            padding: EdgeInsets.all(4.w),
-            itemCount: relatedDiseases.length,
-            itemBuilder: (context, index) {
-              final disease = relatedDiseases[index] as Map<String, dynamic>;
-              return _buildDiseaseCard(disease);
-            },
-          );
+              SizedBox(height: 2.h),
+              Text(
+                'No Related Diseases',
+                style: AppTheme.lightTheme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.lightTheme.colorScheme.onSurface,
+                ),
+              ),
+              SizedBox(height: 1.h),
+              Text(
+                'This medicine has no specified related diseases in our records.',
+                textAlign: TextAlign.center,
+                style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
+                  color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+    return ListView.builder(
+      padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
+      itemCount: relatedDiseases.length,
+      itemBuilder: (context, index) {
+        final disease = relatedDiseases[index] as Map<String, dynamic>;
+        return _buildDiseaseCard(disease);
+      },
+    );
   }
 
   Widget _buildPrecautionsTab() {
-    return SingleChildScrollView(
-      padding: EdgeInsets.all(4.w),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Contraindications
-          _buildSectionHeader('Contraindications'),
-          SizedBox(height: 1.h),
-          _buildWarningCard(
-            medicineData['contraindications'] ??
-                'No specific contraindications listed.',
-            Colors.red,
-          ),
-
-          SizedBox(height: 3.h),
-
-          // Side Effects
-          _buildSectionHeader('Possible Side Effects'),
-          SizedBox(height: 1.h),
-          _buildWarningCard(
-            medicineData['sideEffects'] ??
-                'No known side effects when used as directed.',
-            Colors.orange,
-          ),
-
-          SizedBox(height: 3.h),
-
-          // General Precautions
-          _buildSectionHeader('General Precautions'),
-          SizedBox(height: 1.h),
-          _buildPrecautionsList(),
-        ],
-      ),
+    return ListView(
+      padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
+      children: [
+        _buildSectionHeader('Contraindications'),
+        SizedBox(height: 1.h),
+        _buildWarningCard(
+          'warning',
+          'Not Recommended If...',
+          medicineData['contraindications'] ??
+              'No specific contraindications listed.',
+          const Color(0xFFD32F2F), // Red
+        ),
+        SizedBox(height: 3.h),
+        _buildSectionHeader('Possible Side Effects'),
+        SizedBox(height: 1.h),
+        _buildWarningCard(
+          'report_problem',
+          'Be Aware Of...',
+          medicineData['sideEffects'] ??
+              'No known side effects when used as directed.',
+          const Color(0xFFFFA000), // Orange
+        ),
+        SizedBox(height: 3.h),
+        _buildSectionHeader('General Precautions'),
+        SizedBox(height: 1.h),
+        _buildPrecautionsList(),
+      ],
     );
   }
+
+  // --- Reusable Component Widgets ---
 
   Widget _buildSectionHeader(String title) {
     return Text(
@@ -184,182 +176,149 @@ class MedicineTabContentWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildPropertiesGrid() {
+  Widget _buildPropertiesCard() {
     final properties =
         medicineData['properties'] as Map<String, dynamic>? ?? {};
-
-    return Container(
-      padding: EdgeInsets.all(4.w),
-      decoration: BoxDecoration(
-        color: AppTheme.lightTheme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: AppTheme.lightTheme.colorScheme.outline.withValues(alpha: 0.2),
+    return Card(
+      elevation: 0,
+      color: AppTheme.lightTheme.colorScheme.surfaceVariant.withOpacity(0.5),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: EdgeInsets.all(4.w),
+        child: Column(
+          children: properties.entries.map((entry) {
+            return Padding(
+              padding: EdgeInsets.symmetric(vertical: 0.5.h),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    flex: 2,
+                    child: Text(
+                      entry.key,
+                      style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w500,
+                        color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                  Text(': ', style: AppTheme.lightTheme.textTheme.bodyMedium),
+                  Expanded(
+                    flex: 3,
+                    child: Text(
+                      entry.value.toString(),
+                      style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
+                        color: AppTheme.lightTheme.colorScheme.onSurface,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }).toList(),
         ),
-      ),
-      child: Column(
-        children: properties.entries.map((entry) {
-          return Padding(
-            padding: EdgeInsets.symmetric(vertical: 0.5.h),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  flex: 2,
-                  child: Text(
-                    entry.key,
-                    style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w500,
-                      color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ),
-                Text(': ', style: AppTheme.lightTheme.textTheme.bodyMedium),
-                Expanded(
-                  flex: 3,
-                  child: Text(
-                    entry.value.toString(),
-                    style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
-                      color: AppTheme.lightTheme.colorScheme.onSurface,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          );
-        }).toList(),
       ),
     );
   }
 
-  Widget _buildInfoCard(String label, String value) {
-    return Container(
+  Widget _buildInfoCard(String iconName, String label, String value) {
+    return Card(
+      elevation: 0,
       margin: EdgeInsets.only(bottom: 1.h),
-      padding: EdgeInsets.all(3.w),
-      decoration: BoxDecoration(
-        color: AppTheme.lightTheme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: AppTheme.lightTheme.colorScheme.outline.withValues(alpha: 0.2),
+      color: AppTheme.lightTheme.colorScheme.surfaceVariant.withOpacity(0.5),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: EdgeInsets.all(3.w),
+        child: Row(
+          children: [
+            CustomIconWidget(
+              iconName: iconName,
+              color: AppTheme.lightTheme.colorScheme.primary,
+              size: 20,
+            ),
+            SizedBox(width: 3.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: AppTheme.lightTheme.textTheme.labelLarge?.copyWith(
+                      color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  SizedBox(height: 0.5.h),
+                  Text(
+                    value,
+                    style: AppTheme.lightTheme.textTheme.bodyLarge?.copyWith(
+                      color: AppTheme.lightTheme.colorScheme.onSurface,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            flex: 2,
-            child: Text(
-              label,
-              style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w500,
-                color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ),
-          Text(': ', style: AppTheme.lightTheme.textTheme.bodyMedium),
-          Expanded(
-            flex: 3,
-            child: Text(
-              value,
-              style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
-                color: AppTheme.lightTheme.colorScheme.onSurface,
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }
 
   Widget _buildDosageCard() {
     final dosage = medicineData['dosage'] as Map<String, dynamic>? ?? {};
-
-    return Container(
-      padding: EdgeInsets.all(4.w),
-      decoration: BoxDecoration(
-        color: AppTheme.lightTheme.colorScheme.tertiary.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color:
-              AppTheme.lightTheme.colorScheme.tertiary.withValues(alpha: 0.3),
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              CustomIconWidget(
-                iconName: 'medication',
-                color: AppTheme.lightTheme.colorScheme.tertiary,
-                size: 20,
+    return Card(
+      elevation: 0,
+      color: AppTheme.lightTheme.colorScheme.tertiaryContainer.withOpacity(0.5),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: EdgeInsets.all(4.w),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              dosage['adult'] ??
+                  '1-2 grams twice daily or as directed by physician',
+              style: AppTheme.lightTheme.textTheme.bodyLarge?.copyWith(
+                color: AppTheme.lightTheme.colorScheme.onTertiaryContainer,
+                fontWeight: FontWeight.w500,
+                height: 1.5,
               ),
-              SizedBox(width: 2.w),
+            ),
+            if (dosage['children'] != null) ...[
+              SizedBox(height: 1.h),
               Text(
-                'Recommended Dosage',
-                style: AppTheme.lightTheme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: AppTheme.lightTheme.colorScheme.onTertiaryContainer,
+                'Children: ${dosage['children']}',
+                style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
+                  color: AppTheme.lightTheme.colorScheme.onTertiaryContainer
+                      .withOpacity(0.8),
                 ),
               ),
             ],
-          ),
-          SizedBox(height: 1.h),
-          Text(
-            dosage['adult'] ??
-                '1-2 grams twice daily or as directed by physician',
-            style: AppTheme.lightTheme.textTheme.bodyLarge?.copyWith(
-              color: AppTheme.lightTheme.colorScheme.onTertiaryContainer,
-            ),
-          ),
-          if (dosage['children'] != null) ...[
-            SizedBox(height: 1.h),
-            Text(
-              'Children: ${dosage['children']}',
-              style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
-                color: AppTheme.lightTheme.colorScheme.onTertiaryContainer,
-                fontStyle: FontStyle.italic,
-              ),
-            ),
           ],
-        ],
+        ),
       ),
     );
   }
 
   Widget _buildPreparationSteps() {
-    final steps = medicineData['preparation'] as List? ??
-        [
-          'Take the prescribed amount of medicine',
-          'Mix with warm water or honey as directed',
-          'Consume on empty stomach for better absorption',
-          'Follow the timing as advised by physician'
-        ];
-
+    final steps = medicineData['preparation'] as List? ?? [];
     return Column(
       children: steps.asMap().entries.map((entry) {
         int index = entry.key;
         String step = entry.value.toString();
-
-        return Container(
-          margin: EdgeInsets.only(bottom: 2.h),
+        return Padding(
+          padding: EdgeInsets.only(bottom: 2.h),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: 6.w,
-                height: 6.w,
-                decoration: BoxDecoration(
-                  color: AppTheme.lightTheme.colorScheme.primary,
-                  shape: BoxShape.circle,
-                ),
-                child: Center(
-                  child: Text(
-                    '${index + 1}',
-                    style: AppTheme.lightTheme.textTheme.labelMedium?.copyWith(
-                      color: AppTheme.lightTheme.colorScheme.onPrimary,
-                      fontWeight: FontWeight.w600,
-                    ),
+              CircleAvatar(
+                radius: 3.5.w,
+                backgroundColor: AppTheme.lightTheme.colorScheme.primary,
+                child: Text(
+                  '${index + 1}',
+                  style: AppTheme.lightTheme.textTheme.labelMedium?.copyWith(
+                    color: AppTheme.lightTheme.colorScheme.onPrimary,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
@@ -381,51 +340,51 @@ class MedicineTabContentWidget extends StatelessWidget {
   }
 
   Widget _buildAdministrationInfo() {
-    return Container(
-      padding: EdgeInsets.all(4.w),
-      decoration: BoxDecoration(
-        color: AppTheme.lightTheme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: AppTheme.lightTheme.colorScheme.outline.withValues(alpha: 0.2),
+    return Card(
+      elevation: 0,
+      color: AppTheme.lightTheme.colorScheme.surfaceVariant.withOpacity(0.5),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: EdgeInsets.all(4.w),
+        child: Column(
+          children: [
+            _buildAdminItem('schedule', 'Best Time',
+                medicineData['bestTime'] ?? 'Before meals'),
+            _buildAdminItem('timelapse', 'Duration',
+                medicineData['duration'] ?? 'As prescribed by physician'),
+            _buildAdminItem('blender', 'With',
+                medicineData['takeWith'] ?? 'Warm water or honey'),
+            _buildAdminItem('inventory_2', 'Storage',
+                medicineData['storage'] ?? 'Store in cool, dry place'),
+          ],
         ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildAdminItem(
-              'Best Time', medicineData['bestTime'] ?? 'Before meals'),
-          _buildAdminItem('Duration',
-              medicineData['duration'] ?? 'As prescribed by physician'),
-          _buildAdminItem(
-              'With', medicineData['takeWith'] ?? 'Warm water or honey'),
-          _buildAdminItem(
-              'Storage', medicineData['storage'] ?? 'Store in cool, dry place'),
-        ],
       ),
     );
   }
 
-  Widget _buildAdminItem(String label, String value) {
+  Widget _buildAdminItem(String iconName, String label, String value) {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 1.h),
+      padding: EdgeInsets.symmetric(vertical: 1.5.h),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            width: 20.w,
-            child: Text(
-              label,
-              style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w500,
-                color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
-              ),
+          CustomIconWidget(
+            iconName: iconName,
+            color: AppTheme.lightTheme.colorScheme.primary,
+            size: 20,
+          ),
+          SizedBox(width: 3.w),
+          Text(
+            label,
+            style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w500,
+              color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
             ),
           ),
-          Text(': ', style: AppTheme.lightTheme.textTheme.bodyMedium),
+          const Spacer(),
           Expanded(
             child: Text(
               value,
+              textAlign: TextAlign.end,
               style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
                 color: AppTheme.lightTheme.colorScheme.onSurface,
               ),
@@ -437,43 +396,89 @@ class MedicineTabContentWidget extends StatelessWidget {
   }
 
   Widget _buildDiseaseCard(Map<String, dynamic> disease) {
-    return GestureDetector(
-      onTap: () => onDiseaseCardTap(disease['id'].toString()),
-      child: Container(
-        margin: EdgeInsets.only(bottom: 2.h),
-        padding: EdgeInsets.all(4.w),
-        decoration: BoxDecoration(
-          color: AppTheme.lightTheme.colorScheme.surface,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color:
-                AppTheme.lightTheme.colorScheme.outline.withValues(alpha: 0.2),
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 4,
-              offset: Offset(0, 2),
-            ),
-          ],
+    return Card(
+      elevation: 0,
+      margin: EdgeInsets.only(bottom: 2.h),
+      color: AppTheme.lightTheme.colorScheme.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(
+          color: AppTheme.lightTheme.colorScheme.outline.withOpacity(0.2),
         ),
-        child: Row(
-          children: [
-            Container(
-              width: 12.w,
-              height: 12.w,
-              decoration: BoxDecoration(
-                color: AppTheme.lightTheme.colorScheme.primary
-                    .withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Center(
-                child: CustomIconWidget(
-                  iconName: 'medical_services',
-                  color: AppTheme.lightTheme.colorScheme.primary,
-                  size: 24,
+      ),
+      child: InkWell(
+        onTap: () => onDiseaseCardTap(disease['id'].toString()),
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: EdgeInsets.all(4.w),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      disease['name'] ?? 'Unknown Disease',
+                      style:
+                          AppTheme.lightTheme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: AppTheme.lightTheme.colorScheme.onSurface,
+                      ),
+                    ),
+                    if (disease['tamilName'] != null) ...[
+                      SizedBox(height: 0.5.h),
+                      Text(
+                        disease['tamilName'],
+                        style:
+                            AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
+                          color: AppTheme.lightTheme.colorScheme.primary,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                    SizedBox(height: 1.h),
+                    Text(
+                      disease['description'] ?? 'No description available',
+                      style: AppTheme.lightTheme.textTheme.bodySmall?.copyWith(
+                        color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                 ),
               ),
+              SizedBox(width: 3.w),
+              Icon(
+                Icons.arrow_forward_ios,
+                size: 16,
+                color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildWarningCard(
+      String iconName, String title, String content, Color warningColor) {
+    return Card(
+      elevation: 0,
+      color: warningColor.withOpacity(0.1),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: warningColor.withOpacity(0.3)),
+      ),
+      child: Padding(
+        padding: EdgeInsets.all(4.w),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            CustomIconWidget(
+              iconName: iconName,
+              color: warningColor,
+              size: 24,
             ),
             SizedBox(width: 3.w),
             Expanded(
@@ -481,78 +486,23 @@ class MedicineTabContentWidget extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    disease['name'] ?? 'Unknown Disease',
+                    title,
                     style: AppTheme.lightTheme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: AppTheme.lightTheme.colorScheme.onSurface,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                        fontWeight: FontWeight.bold, color: warningColor),
                   ),
-                  if (disease['tamilName'] != null) ...[
-                    SizedBox(height: 0.5.h),
-                    Text(
-                      disease['tamilName'],
-                      style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
-                        color: AppTheme.lightTheme.colorScheme.primary,
-                        fontWeight: FontWeight.w500,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                  SizedBox(height: 0.5.h),
+                  SizedBox(height: 1.h),
                   Text(
-                    disease['description'] ?? 'No description available',
-                    style: AppTheme.lightTheme.textTheme.bodySmall?.copyWith(
-                      color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+                    content,
+                    style: AppTheme.lightTheme.textTheme.bodyLarge?.copyWith(
+                      color: AppTheme.lightTheme.colorScheme.onSurface,
+                      height: 1.5,
                     ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),
             ),
-            CustomIconWidget(
-              iconName: 'arrow_forward_ios',
-              color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
-              size: 16,
-            ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildWarningCard(String content, Color warningColor) {
-    return Container(
-      padding: EdgeInsets.all(4.w),
-      decoration: BoxDecoration(
-        color: warningColor.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: warningColor.withValues(alpha: 0.3),
-        ),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          CustomIconWidget(
-            iconName: 'warning',
-            color: warningColor,
-            size: 20,
-          ),
-          SizedBox(width: 3.w),
-          Expanded(
-            child: Text(
-              content,
-              style: AppTheme.lightTheme.textTheme.bodyLarge?.copyWith(
-                color: AppTheme.lightTheme.colorScheme.onSurface,
-                height: 1.5,
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -566,28 +516,26 @@ class MedicineTabContentWidget extends StatelessWidget {
       'Do not exceed recommended dosage',
       'Store in original container away from direct sunlight'
     ];
-
     return Column(
       children: precautions.map((precaution) {
-        return Container(
-          margin: EdgeInsets.only(bottom: 1.h),
+        return Padding(
+          padding: EdgeInsets.only(bottom: 2.h),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                margin: EdgeInsets.only(top: 1.h),
-                width: 1.w,
-                height: 1.w,
-                decoration: BoxDecoration(
-                  color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
-                  shape: BoxShape.circle,
+              Padding(
+                padding: EdgeInsets.only(top: 0.8.h),
+                child: CircleAvatar(
+                  radius: 0.8.w,
+                  backgroundColor:
+                      AppTheme.lightTheme.colorScheme.onSurfaceVariant,
                 ),
               ),
               SizedBox(width: 3.w),
               Expanded(
                 child: Text(
                   precaution,
-                  style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
+                  style: AppTheme.lightTheme.textTheme.bodyLarge?.copyWith(
                     color: AppTheme.lightTheme.colorScheme.onSurface,
                     height: 1.5,
                   ),

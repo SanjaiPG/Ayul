@@ -7,8 +7,6 @@ class MedicineHeaderWidget extends StatelessWidget {
   final String englishName;
   final String tamilName;
   final String pronunciation;
-  final bool isBookmarked;
-  final VoidCallback onBookmarkTap;
   final VoidCallback onShareTap;
 
   const MedicineHeaderWidget({
@@ -16,8 +14,6 @@ class MedicineHeaderWidget extends StatelessWidget {
     required this.englishName,
     required this.tamilName,
     required this.pronunciation,
-    required this.isBookmarked,
-    required this.onBookmarkTap,
     required this.onShareTap,
   }) : super(key: key);
 
@@ -30,9 +26,10 @@ class MedicineHeaderWidget extends StatelessWidget {
         color: AppTheme.lightTheme.colorScheme.surface,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color:
+                Colors.black.withOpacity(0.05), // Using withOpacity for clarity
             blurRadius: 8,
-            offset: Offset(0, 2),
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -61,7 +58,7 @@ class MedicineHeaderWidget extends StatelessWidget {
                   padding: EdgeInsets.all(2.w),
                   decoration: BoxDecoration(
                     color: AppTheme.lightTheme.colorScheme.primary
-                        .withValues(alpha: 0.1),
+                        .withOpacity(0.1), // Using withOpacity
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: CustomIconWidget(
@@ -71,33 +68,10 @@ class MedicineHeaderWidget extends StatelessWidget {
                   ),
                 ),
               ),
-              SizedBox(width: 2.w),
-              // Bookmark button
-              GestureDetector(
-                onTap: onBookmarkTap,
-                child: Container(
-                  padding: EdgeInsets.all(2.w),
-                  decoration: BoxDecoration(
-                    color: isBookmarked
-                        ? AppTheme.lightTheme.colorScheme.primary
-                            .withValues(alpha: 0.1)
-                        : AppTheme.lightTheme.colorScheme.outline
-                            .withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: CustomIconWidget(
-                    iconName: isBookmarked ? 'bookmark' : 'bookmark_border',
-                    color: isBookmarked
-                        ? AppTheme.lightTheme.colorScheme.primary
-                        : AppTheme.lightTheme.colorScheme.onSurfaceVariant,
-                    size: 20,
-                  ),
-                ),
-              ),
             ],
           ),
 
-          SizedBox(height: 1.h),
+          if (tamilName.isNotEmpty) SizedBox(height: 1.h),
 
           // Tamil name and pronunciation
           if (tamilName.isNotEmpty) ...[
@@ -117,7 +91,7 @@ class MedicineHeaderWidget extends StatelessWidget {
                 padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 1.h),
                 decoration: BoxDecoration(
                   color: AppTheme.lightTheme.colorScheme.tertiary
-                      .withValues(alpha: 0.1),
+                      .withOpacity(0.1), // Using withOpacity
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(

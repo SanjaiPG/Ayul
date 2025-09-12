@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../core/app_export.dart';
-import './widgets/medicine_bottom_actions_widget.dart';
 import './widgets/medicine_header_widget.dart';
 import './widgets/medicine_image_gallery_widget.dart';
 import './widgets/medicine_tab_content_widget.dart';
@@ -18,7 +17,6 @@ class MedicineDetailScreen extends StatefulWidget {
 class _MedicineDetailScreenState extends State<MedicineDetailScreen>
     with TickerProviderStateMixin {
   late TabController _tabController;
-  bool _isBookmarked = false;
   bool _isInStudyList = false;
   String _currentLanguage = 'english';
 
@@ -131,8 +129,6 @@ class _MedicineDetailScreenState extends State<MedicineDetailScreen>
                     englishName: _medicineData['englishName'],
                     tamilName: _medicineData['tamilName'],
                     pronunciation: _medicineData['pronunciation'],
-                    isBookmarked: _isBookmarked,
-                    onBookmarkTap: _toggleBookmark,
                     onShareTap: _shareMedicine,
                   ),
                 ),
@@ -174,12 +170,7 @@ class _MedicineDetailScreenState extends State<MedicineDetailScreen>
             ),
           ),
 
-          // Bottom Actions
-          MedicineBottomActionsWidget(
-            onViewRelatedDiseases: _viewRelatedDiseases,
-            onAddToStudyList: _toggleStudyList,
-            isInStudyList: _isInStudyList,
-          ),
+          // Bottom Action
         ],
       ),
     );
@@ -197,9 +188,9 @@ class _MedicineDetailScreenState extends State<MedicineDetailScreen>
         color: AppTheme.lightTheme.colorScheme.surface,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Colors.black.withOpacity(0.05),
             blurRadius: 4,
-            offset: Offset(0, 2),
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -210,8 +201,7 @@ class _MedicineDetailScreenState extends State<MedicineDetailScreen>
             child: Container(
               padding: EdgeInsets.all(2.w),
               decoration: BoxDecoration(
-                color: AppTheme.lightTheme.colorScheme.primary
-                    .withValues(alpha: 0.1),
+                color: AppTheme.lightTheme.colorScheme.primary.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: CustomIconWidget(
@@ -237,12 +227,12 @@ class _MedicineDetailScreenState extends State<MedicineDetailScreen>
             child: Container(
               padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 1.h),
               decoration: BoxDecoration(
-                color: AppTheme.lightTheme.colorScheme.tertiary
-                    .withValues(alpha: 0.1),
+                color:
+                    AppTheme.lightTheme.colorScheme.tertiary.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color: AppTheme.lightTheme.colorScheme.tertiary
-                      .withValues(alpha: 0.3),
+                  color:
+                      AppTheme.lightTheme.colorScheme.tertiary.withOpacity(0.3),
                 ),
               ),
               child: Row(
@@ -298,24 +288,6 @@ class _MedicineDetailScreenState extends State<MedicineDetailScreen>
     );
   }
 
-  void _toggleBookmark() {
-    setState(() {
-      _isBookmarked = !_isBookmarked;
-    });
-
-    HapticFeedback.lightImpact();
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          _isBookmarked ? 'Added to bookmarks' : 'Removed from bookmarks',
-        ),
-        duration: Duration(seconds: 2),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-  }
-
   void _shareMedicine() {
     HapticFeedback.lightImpact();
 
@@ -332,7 +304,7 @@ Shared from Siddha Acu Edu App
 
     // In a real app, you would use the share_plus package
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
+      const SnackBar(
         content: Text('Medicine details copied to clipboard'),
         duration: Duration(seconds: 2),
         behavior: SnackBarBehavior.floating,
@@ -352,7 +324,7 @@ Shared from Siddha Acu Edu App
         content: Text(
           'Language switched to ${_currentLanguage == 'english' ? 'English' : 'Tamil'}',
         ),
-        duration: Duration(seconds: 1),
+        duration: const Duration(seconds: 1),
         behavior: SnackBarBehavior.floating,
       ),
     );
@@ -365,7 +337,7 @@ Shared from Siddha Acu Edu App
     // Navigator.pushNamed(context, '/disease-detail-screen', arguments: diseaseId);
 
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
+      const SnackBar(
         content: Text('Navigating to disease details...'),
         duration: Duration(seconds: 2),
         behavior: SnackBarBehavior.floating,
@@ -380,7 +352,7 @@ Shared from Siddha Acu Edu App
     _tabController.animateTo(2);
 
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
+      const SnackBar(
         content: Text('Showing related diseases'),
         duration: Duration(seconds: 1),
         behavior: SnackBarBehavior.floating,
@@ -395,12 +367,12 @@ Shared from Siddha Acu Edu App
 
     HapticFeedback.lightImpact();
 
-    ScaffoldMessenger.of(context).showSnackBar(
+    ScaffoldMessenger.of((context)).showSnackBar(
       SnackBar(
         content: Text(
           _isInStudyList ? 'Added to study list' : 'Removed from study list',
         ),
-        duration: Duration(seconds: 2),
+        duration: const Duration(seconds: 2),
         behavior: SnackBarBehavior.floating,
       ),
     );

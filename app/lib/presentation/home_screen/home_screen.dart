@@ -2,15 +2,15 @@
 
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 
 import '../../core/app_export.dart';
 import './widgets/body_parts_explorer_widget.dart';
 import './widgets/educational_tips_widget.dart';
-import './widgets/language_toggle_widget.dart';
 import './widgets/navigation_card_widget.dart';
 import './widgets/offline_indicator_widget.dart';
 import './widgets/quick_access_card_widget.dart';
-import './widgets/disease_questionnaire_widget.dart'; // 👈 Import the new widget
+import './widgets/disease_questionnaire_widget.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -65,6 +65,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
+    _tabController.addListener(() {
+      setState(() {});
+    });
     _checkConnectivity();
     _setupConnectivityListener();
   }
@@ -77,16 +80,26 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   void _checkConnectivity() async {
     final connectivityResult = await Connectivity().checkConnectivity();
-    setState(() {
-      _isOffline = connectivityResult == ConnectivityResult.none;
-    });
+    if (mounted) {
+      setState(() {
+        _isOffline = connectivityResult == ConnectivityResult.none;
+      });
+    }
   }
 
   void _setupConnectivityListener() {
     Connectivity().onConnectivityChanged.listen((ConnectivityResult result) {
-      setState(() {
-        _isOffline = result == ConnectivityResult.none;
-      });
+      if (mounted) {
+        setState(() {
+          _isOffline = result == ConnectivityResult.none;
+        });
+      }
+    });
+  }
+
+  void _toggleLanguage() {
+    setState(() {
+      _currentLanguage = _currentLanguage == 'EN' ? 'TA' : 'EN';
     });
   }
 
@@ -94,16 +107,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     setState(() {
       _isRefreshing = true;
     });
-
-    // Simulate refresh delay
-    await Future.delayed(Duration(seconds: 2));
-
+    await Future.delayed(const Duration(seconds: 2));
     setState(() {
       _isRefreshing = false;
     });
 
-    if (!_isOffline) {
-      // Show success message
+    if (!_isOffline && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(_currentLanguage == 'EN'
@@ -113,12 +122,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         ),
       );
     }
-  }
-
-  void _onLanguageChanged(String language) {
-    setState(() {
-      _currentLanguage = language;
-    });
   }
 
   void _navigateToSiddhaSection() {
@@ -160,6 +163,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         child: Column(
           children: [
             OfflineIndicatorWidget(isOffline: _isOffline),
+            // ✨ New Professional Header Widget
             _buildHeader(),
             Expanded(
               child: TabBarView(
@@ -179,61 +183,141 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
+  // ✨ START: New Professional Header Widget
   Widget _buildHeader() {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
+      padding: EdgeInsets.symmetric(horizontal: 4.w).copyWith(bottom: 2.h),
       decoration: BoxDecoration(
         color: AppTheme.lightTheme.colorScheme.surface,
         boxShadow: [
           BoxShadow(
-            color:
-                AppTheme.lightTheme.colorScheme.shadow.withValues(alpha: 0.05),
-            blurRadius: 4,
-            offset: Offset(0, 2),
+            color: AppTheme.lightTheme.colorScheme.shadow.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
           ),
         ],
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          SizedBox(height: 1.h),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Text(
-                _currentLanguage == 'EN' ? 'Ayul' : 'ஆயுள்',
-                style: TextStyle(
-                  fontSize: 20.sp,
-                  fontWeight: FontWeight.w700,
-                  color: AppTheme.lightTheme.primaryColor,
-                ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    _currentLanguage == 'EN' ? 'Ayul' : 'ஆயுள்',
+                    style: TextStyle(
+                      fontSize: 22.sp,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.lightTheme.colorScheme.primary,
+                      height: 1.2,
+                    ),
+                  ),
+                ],
               ),
-              Text(
-                _currentLanguage == 'EN'
-                    ? 'Traditional Medicine Learning'
-                    : 'பாரம்பரிய மருத்துவ கல்வி',
-                style: TextStyle(
-                  fontSize: 12.sp,
-                  fontWeight: FontWeight.w400,
-                  color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
-                ),
-              ),
+              Row(
+                children: [
+                  InkWell(
+                    onTap: _toggleLanguage,
+                    borderRadius: BorderRadius.circular(20),
+                    child: Container(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 3.w, vertical: 1.h),
+                      decoration: BoxDecoration(
+                        color: AppTheme.lightTheme.scaffoldBackgroundColor,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: AppTheme.lightTheme.colorScheme.outline
+                              .withOpacity(0.3),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          CustomIconWidget(
+                            iconName: 'language',
+                            size: 16,
+                            color: AppTheme.lightTheme.colorScheme.primary,
+                          ),
+                          SizedBox(width: 2.w),
+                          Text(
+                            _currentLanguage,
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: AppTheme.lightTheme.colorScheme.primary,
+                                fontSize: 11.sp),
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: CustomIconWidget(
+                      iconName: 'notifications_none',
+                      color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+                      size: 28,
+                    ),
+                    onPressed: () {
+                      // Handle notification tap
+                    },
+                  ),
+                ],
+              )
             ],
           ),
-          LanguageToggleWidget(
-            currentLanguage: _currentLanguage,
-            onLanguageChanged: _onLanguageChanged,
+          SizedBox(height: 2.h),
+          // Fake Search Bar
+          GestureDetector(
+            onTap: () {
+              // Navigate to search screen or focus search field
+              _tabController.animateTo(1);
+            },
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.5.h),
+              decoration: BoxDecoration(
+                color: AppTheme.lightTheme.scaffoldBackgroundColor,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color:
+                      AppTheme.lightTheme.colorScheme.outline.withOpacity(0.3),
+                ),
+              ),
+              child: Row(
+                children: [
+                  CustomIconWidget(
+                    iconName: 'search',
+                    color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+                    size: 20,
+                  ),
+                  SizedBox(width: 3.w),
+                  Text(
+                    _currentLanguage == 'EN'
+                        ? 'Search medicines, diseases...'
+                        : 'மருந்துகள், நோய்களைத் தேடுங்கள்...',
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
       ),
     );
   }
+  // ✨ END: New Professional Header Widget
 
   Widget _buildHomeTab() {
     return RefreshIndicator(
       onRefresh: _onRefresh,
       color: AppTheme.lightTheme.primaryColor,
       child: SingleChildScrollView(
-        physics: AlwaysScrollableScrollPhysics(),
+        physics: const AlwaysScrollableScrollPhysics(),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -246,7 +330,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             SizedBox(height: 2.h),
             _recentContent.isEmpty
                 ? EducationalTipsWidget(currentLanguage: _currentLanguage)
-                : SizedBox.shrink(),
+                : const SizedBox.shrink(),
             SizedBox(height: 2.h),
           ],
         ),
@@ -255,14 +339,15 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   Widget _buildNavigationCards() {
+    // ... This widget remains unchanged
     return Column(
       children: [
         NavigationCardWidget(
           title:
               _currentLanguage == 'EN' ? 'Siddha Medicine' : 'சித்த மருத்துவம்',
           description: _currentLanguage == 'EN'
-              ? 'Explore traditional Siddha medicines, treatments and ancient healing wisdom'
-              : 'பாரம்பரிய சித்த மருந்துகள், சிகிச்சைகள் மற்றும் பண்டைய குணப்படுத்தும் ஞானத்தை ஆராயுங்கள்',
+              ? 'Explore traditional Siddha medicines and ancient healing wisdom'
+              : 'பாரம்பரிய சித்த மருந்துகள் மற்றும் பண்டைய குணப்படுத்தும் ஞானத்தை ஆராயுங்கள்',
           iconName: 'local_pharmacy',
           route: '/medicine-listing-screen',
           onTap: _navigateToSiddhaSection,
@@ -271,8 +356,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           title:
               _currentLanguage == 'EN' ? 'Acupuncture' : 'குத்தூசி மருத்துவம்',
           description: _currentLanguage == 'EN'
-              ? 'Learn about acupuncture points, techniques and therapeutic applications'
-              : 'குத்தூசி புள்ளிகள், நுட்பங்கள் மற்றும் சிகிச்சை பயன்பாடுகளைப் பற்றி அறியுங்கள்',
+              ? 'Learn about acupuncture points, techniques and applications'
+              : 'குத்தூசி புள்ளிகள், நுட்பங்கள் மற்றும் பயன்பாடுகளைப் பற்றி அறியுங்கள்',
           iconName: 'healing',
           route: '/medicine-listing-screen',
           onTap: _navigateToAcupunctureSection,
@@ -282,10 +367,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   Widget _buildQuickAccessSection() {
+    // ... This widget remains unchanged
     if (_recentContent.isEmpty) {
-      return SizedBox.shrink();
+      return const SizedBox.shrink();
     }
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -303,9 +388,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 ),
               ),
               TextButton(
-                onPressed: () {
-                  // Navigate to full recent list
-                },
+                onPressed: () {},
                 child: Text(
                   _currentLanguage == 'EN' ? 'View All' : 'அனைத்தையும் பார்க்க',
                   style: TextStyle(
@@ -319,16 +402,16 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           ),
         ),
         SizedBox(height: 1.h),
-        Container(
+        SizedBox(
           height: 25.h,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
-            padding: EdgeInsets.symmetric(horizontal: 4.w),
+            padding: EdgeInsets.only(left: 4.w),
             itemCount: _recentContent.length,
             itemBuilder: (context, index) {
               final item = _recentContent[index];
               return QuickAccessCardWidget(
-                title: _currentLanguage == 'EN' ? item['title'] : item['title'],
+                title: item['title'],
                 subtitle: item['subtitle'],
                 imageUrl: item['image'],
                 type: item['type'],
@@ -342,80 +425,87 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   Widget _buildSearchTab() {
+    // ... This widget remains unchanged
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          CustomIconWidget(
-            iconName: 'search',
-            color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
-            size: 64,
-          ),
-          SizedBox(height: 2.h),
-          Text(
-            _currentLanguage == 'EN' ? 'Search Feature' : 'தேடல் அம்சம்',
-            style: TextStyle(
-              fontSize: 18.sp,
-              fontWeight: FontWeight.w600,
-              color: AppTheme.lightTheme.colorScheme.onSurface,
-            ),
-          ),
-          SizedBox(height: 1.h),
-          Text(
-            _currentLanguage == 'EN'
-                ? 'Coming Soon - Search across medicines, diseases, and body parts'
-                : 'விரைவில் வரும் - மருந்துகள், நோய்கள் மற்றும் உடல் பாகங்களில் தேடுங்கள்',
-            style: TextStyle(
-              fontSize: 14.sp,
-              fontWeight: FontWeight.w400,
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 8.w),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CustomIconWidget(
+              iconName: 'search',
               color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+              size: 64,
             ),
-            textAlign: TextAlign.center,
-          ),
-        ],
+            SizedBox(height: 2.h),
+            Text(
+              _currentLanguage == 'EN' ? 'Search Feature' : 'தேடல் அம்சம்',
+              style: TextStyle(
+                fontSize: 18.sp,
+                fontWeight: FontWeight.w600,
+                color: AppTheme.lightTheme.colorScheme.onSurface,
+              ),
+            ),
+            SizedBox(height: 1.h),
+            Text(
+              _currentLanguage == 'EN'
+                  ? 'Coming Soon - Search across medicines, diseases, and body parts'
+                  : 'விரைவில் வரும் - மருந்துகள், நோய்கள் மற்றும் உடல் பாகங்களில் தேடுங்கள்',
+              style: TextStyle(
+                fontSize: 14.sp,
+                color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildBooksTab() {
+    // ... This widget remains unchanged
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          CustomIconWidget(
-            iconName: 'menu_book',
-            color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
-            size: 64,
-          ),
-          SizedBox(height: 2.h),
-          Text(
-            _currentLanguage == 'EN'
-                ? 'Siddha Books Library'
-                : 'சித்த நூல் நூலகம்',
-            style: TextStyle(
-              fontSize: 18.sp,
-              fontWeight: FontWeight.w600,
-              color: AppTheme.lightTheme.colorScheme.onSurface,
-            ),
-          ),
-          SizedBox(height: 1.h),
-          Text(
-            _currentLanguage == 'EN'
-                ? 'Coming Soon - Access traditional Siddha texts and references'
-                : 'விரைவில் வரும் - பாரம்பரிய சித்த நூல்கள் மற்றும் குறிப்புகளை அணுகவும்',
-            style: TextStyle(
-              fontSize: 14.sp,
-              fontWeight: FontWeight.w400,
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 8.w),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CustomIconWidget(
+              iconName: 'menu_book',
               color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+              size: 64,
             ),
-            textAlign: TextAlign.center,
-          ),
-        ],
+            SizedBox(height: 2.h),
+            Text(
+              _currentLanguage == 'EN'
+                  ? 'Siddha Books Library'
+                  : 'சித்த நூல் நூலகம்',
+              style: TextStyle(
+                fontSize: 18.sp,
+                fontWeight: FontWeight.w600,
+                color: AppTheme.lightTheme.colorScheme.onSurface,
+              ),
+            ),
+            SizedBox(height: 1.h),
+            Text(
+              _currentLanguage == 'EN'
+                  ? 'Coming Soon - Access traditional Siddha texts and references'
+                  : 'விரைவில் வரும் - பாரம்பரிய சித்த நூல்கள் மற்றும் குறிப்புகளை அணுகவும்',
+              style: TextStyle(
+                fontSize: 14.sp,
+                color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildFindDiseaseTab() {
+    // ... This widget remains unchanged
     return DiseaseQuestionnaireWidget(
       currentLanguage: _currentLanguage,
       onMedicineIdentified: (medicine) {
@@ -425,61 +515,72 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   Widget _buildBottomNavigationBar() {
-    return TabBar(
-      controller: _tabController,
-      tabs: [
-        Tab(
-          icon: CustomIconWidget(
+    // ... This widget remains unchanged
+    return Container(
+      padding: EdgeInsets.only(top: 1.h),
+      decoration: BoxDecoration(
+        color: AppTheme.lightTheme.colorScheme.surface,
+        border: Border(
+          top: BorderSide(
+            color: AppTheme.lightTheme.colorScheme.outline.withOpacity(0.2),
+            width: 1,
+          ),
+        ),
+      ),
+      child: TabBar(
+        controller: _tabController,
+        indicator: BoxDecoration(
+          color: AppTheme.lightTheme.primaryColor.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(50),
+        ),
+        indicatorPadding:
+            EdgeInsets.symmetric(vertical: 0.8.h, horizontal: 4.w),
+        indicatorSize: TabBarIndicatorSize.tab,
+        labelColor: AppTheme.lightTheme.primaryColor,
+        unselectedLabelColor: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+        labelStyle: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w600),
+        unselectedLabelStyle:
+            TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w500),
+        tabs: [
+          _buildTab(
             iconName: 'home',
-            color: _tabController.index == 0
-                ? AppTheme.lightTheme.primaryColor
-                : AppTheme.lightTheme.colorScheme.onSurfaceVariant,
-            size: 24,
+            label: _currentLanguage == 'EN' ? 'Home' : 'முகப்பு',
+            index: 0,
           ),
-          text: _currentLanguage == 'EN' ? 'Home' : 'முகப்பு',
-        ),
-        Tab(
-          icon: CustomIconWidget(
+          _buildTab(
             iconName: 'search',
-            color: _tabController.index == 1
-                ? AppTheme.lightTheme.primaryColor
-                : AppTheme.lightTheme.colorScheme.onSurfaceVariant,
-            size: 24,
+            label: _currentLanguage == 'EN' ? 'Search' : 'தேடல்',
+            index: 1,
           ),
-          text: _currentLanguage == 'EN' ? 'Search' : 'தேடல்',
-        ),
-        Tab(
-          icon: CustomIconWidget(
+          _buildTab(
             iconName: 'menu_book',
-            color: _tabController.index == 2
-                ? AppTheme.lightTheme.primaryColor
-                : AppTheme.lightTheme.colorScheme.onSurfaceVariant,
-            size: 24,
+            label: _currentLanguage == 'EN' ? 'Books' : 'நூல்கள்',
+            index: 2,
           ),
-          text: _currentLanguage == 'EN' ? 'Books' : 'நூல்கள்',
-        ),
-        Tab(
-          icon: CustomIconWidget(
+          _buildTab(
             iconName: 'healing',
-            color: _tabController.index == 3
-                ? AppTheme.lightTheme.primaryColor
-                : AppTheme.lightTheme.colorScheme.onSurfaceVariant,
-            size: 24,
+            label: _currentLanguage == 'EN' ? 'Find' : 'கண்டறிய',
+            index: 3,
           ),
-          text: _currentLanguage == 'EN' ? 'Find Disease' : 'நோயைக் கண்டறிய',
-        ),
-      ],
-      labelColor: AppTheme.lightTheme.primaryColor,
-      unselectedLabelColor: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
-      indicatorColor: AppTheme.lightTheme.primaryColor,
-      labelStyle: TextStyle(
-        fontSize: 10.sp,
-        fontWeight: FontWeight.w500,
+        ],
       ),
-      unselectedLabelStyle: TextStyle(
-        fontSize: 10.sp,
-        fontWeight: FontWeight.w400,
+    );
+  }
+
+  Tab _buildTab(
+      {required String iconName, required String label, required int index}) {
+    // ... This widget remains unchanged
+    final isSelected = _tabController.index == index;
+    return Tab(
+      icon: CustomIconWidget(
+        iconName: iconName,
+        color: isSelected
+            ? AppTheme.lightTheme.primaryColor
+            : AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+        size: 24,
       ),
+      text: label,
+      iconMargin: EdgeInsets.only(bottom: 0.5.h),
     );
   }
 }

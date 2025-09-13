@@ -24,62 +24,84 @@ class NavigationCardWidget extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        height: 40.h,
+        // The card now sizes itself to its content, removing the large fixed height.
         margin: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
+        padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
         decoration: BoxDecoration(
           color: AppTheme.lightTheme.colorScheme.surface,
           borderRadius: BorderRadius.circular(16),
+          // A more subtle shadow for a cleaner, "floating" effect.
           boxShadow: [
             BoxShadow(
-              color:
-                  AppTheme.lightTheme.colorScheme.shadow.withValues(alpha: 0.1),
-              blurRadius: 8,
-              offset: Offset(0, 4),
+              color: AppTheme.lightTheme.colorScheme.shadow.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 5),
             ),
           ],
-        ),
-        child: Padding(
-          padding: EdgeInsets.all(4.w),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                padding: EdgeInsets.all(4.w),
-                decoration: BoxDecoration(
-                  color:
-                      AppTheme.lightTheme.primaryColor.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: CustomIconWidget(
-                  iconName: iconName,
-                  color: AppTheme.lightTheme.primaryColor,
-                  size: 48,
-                ),
-              ),
-              SizedBox(height: 3.h),
-              Text(
-                title,
-                style: TextStyle(
-                  fontSize: 18.sp,
-                  fontWeight: FontWeight.w600,
-                  color: AppTheme.lightTheme.colorScheme.onSurface,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: 1.h),
-              Text(
-                description,
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w400,
-                  color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
-                ),
-                textAlign: TextAlign.center,
-                maxLines: 3,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
+          // A subtle border improves definition on white backgrounds.
+          border: Border.all(
+            color: AppTheme.lightTheme.colorScheme.outline.withOpacity(0.2),
+            width: 1,
           ),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Icon on the left
+            Container(
+              padding: EdgeInsets.all(3.w),
+              decoration: BoxDecoration(
+                color: AppTheme.lightTheme.primaryColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: CustomIconWidget(
+                iconName: iconName,
+                color: AppTheme.lightTheme.primaryColor,
+                size: 28, // Adjusted icon size
+              ),
+            ),
+            SizedBox(width: 4.w),
+            // Title and Description in the middle
+            Expanded(
+              child: Column(
+                crossAxisAlignment:
+                    CrossAxisAlignment.start, // Left-aligned text
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w600,
+                      color: AppTheme.lightTheme.colorScheme.onSurface,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  SizedBox(height: 0.5.h),
+                  Text(
+                    description,
+                    style: TextStyle(
+                      fontSize: 11.sp,
+                      fontWeight: FontWeight.w400,
+                      color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+                      height: 1.4, // Improved line spacing for readability
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(width: 3.w),
+            // Arrow icon on the right to indicate navigation
+            CustomIconWidget(
+              iconName: 'arrow_forward_ios',
+              color: AppTheme.lightTheme.colorScheme.onSurfaceVariant
+                  .withOpacity(0.5),
+              size: 16,
+            ),
+          ],
         ),
       ),
     );

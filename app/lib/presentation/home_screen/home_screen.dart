@@ -254,16 +254,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       ),
                     ),
                   ),
-                  IconButton(
-                    icon: CustomIconWidget(
-                      iconName: 'notifications_none',
-                      color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
-                      size: 28,
-                    ),
-                    onPressed: () {
-                      // Handle notification tap
-                    },
-                  ),
                 ],
               )
             ],

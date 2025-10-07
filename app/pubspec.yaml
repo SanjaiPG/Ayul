@@ -17,6 +17,9 @@ dependencies:
   shared_preferences: ^2.2.2 # Required for local data storage
   web: ^1.1.1
   
+  firebase_core: ^3.0.0
+  cloud_firestore: ^5.0.0
+
   # Feature dependencies - safe to modify
   cached_network_image: ^3.3.1
   connectivity_plus: ^5.0.2
@@ -25,7 +28,6 @@ dependencies:
   fl_chart: ^0.65.0
 
   universal_html: ^2.2.4
-  firebase_core: ^4.1.1
 dev_dependencies:
   flutter_test:    # CRITICAL: Required for Flutter project testing - DO NOT REMOVE
     sdk: flutter   # CRITICAL: Required for Flutter project testing - DO NOT REMOVE

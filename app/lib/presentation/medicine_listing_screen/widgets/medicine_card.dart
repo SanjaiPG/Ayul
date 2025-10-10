@@ -82,53 +82,8 @@ class MedicineCard extends StatelessWidget {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    SizedBox(height: 1.5.h),
-                    // Related Diseases Count
-                    Row(
-                      children: [
-                        CustomIconWidget(
-                          iconName: 'local_hospital',
-                          color: AppTheme.lightTheme.primaryColor,
-                          size: 4.w,
-                        ),
-                        SizedBox(width: 1.w),
-                        Text(
-                          currentLanguage == 'Tamil'
-                              ? '${medicine['relatedDiseases']} நோய்கள்'
-                              : '${medicine['relatedDiseases']} diseases',
-                          style: AppTheme.lightTheme.textTheme.labelSmall
-                              ?.copyWith(
-                            color: AppTheme.lightTheme.primaryColor,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
                   ],
                 ),
-              ),
-              Column(
-                children: [
-                  ElevatedButton(
-                    onPressed: () => onTap(medicine),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.lightTheme.primaryColor,
-                      foregroundColor:
-                          AppTheme.lightTheme.colorScheme.onPrimary,
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 3.w, vertical: 1.h),
-                      minimumSize: Size(0, 0),
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                    child: Text(
-                      currentLanguage == 'Tamil' ? 'விவரங்கள்' : 'Details',
-                      style: AppTheme.lightTheme.textTheme.labelSmall?.copyWith(
-                        color: AppTheme.lightTheme.colorScheme.onPrimary,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ],
               ),
             ],
           ),

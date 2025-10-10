@@ -13,6 +13,7 @@ class MedicineTabContentWidget extends StatelessWidget {
     required this.tabType,
     required this.medicineData,
     required this.onDiseaseCardTap,
+    required String currentLanguage,
   }) : super(key: key);
 
   @override

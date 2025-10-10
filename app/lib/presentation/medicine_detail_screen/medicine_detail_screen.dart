@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../core/app_export.dart';
-// Note: The bottom actions widget import is no longer needed.
 import './widgets/medicine_header_widget.dart';
 import './widgets/medicine_image_gallery_widget.dart';
 import './widgets/medicine_tab_content_widget.dart';
@@ -19,69 +18,102 @@ class _MedicineDetailScreenState extends State<MedicineDetailScreen>
     with TickerProviderStateMixin {
   late TabController _tabController;
   String _currentLanguage = 'english';
-
-  // Mock medicine data (remains the same)
-  final Map<String, dynamic> _medicineData = {
-    "id": "med_001",
-    "englishName": "Neem",
-    "tamilName": "வேம்பு",
-    "pronunciation": "Vem-bu",
-    "images": [
-      "https://images.pexels.com/photos/6627946/pexels-photo-6627946.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-      "https://images.pexels.com/photos/7195133/pexels-photo-7195133.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-      "https://images.pexels.com/photos/6627945/pexels-photo-6627945.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
-    ],
-    "description":
-        "Neem is a powerful medicinal plant widely used in Siddha medicine for its antibacterial, antifungal, and anti-inflammatory properties. Known as the 'village pharmacy', every part of the neem tree has therapeutic value...",
-    "scientificName": "Azadirachta indica",
-    "family": "Meliaceae",
-    "parts_used": "Leaves, bark, seeds, oil",
-    "properties": {
-      "Taste": "Bitter (Kaippu)",
-      "Potency": "Cold (Thandappam)",
-      "Post-digestive effect": "Pungent (Karppu)",
-      "Action": "Blood purifier, Anti-microbial"
-    },
-    "dosage": {
-      "adult": "2-4 grams of leaf powder twice daily",
-      "children": "1-2 grams once daily (above 5 years)"
-    },
-    "preparation": [
-      "Wash fresh neem leaves thoroughly",
-      "Dry the leaves in shade for 3-4 days",
-      "Grind dried leaves into fine powder",
-      "Store in airtight container",
-      "Mix prescribed amount with warm water or honey before consumption"
-    ],
-    "bestTime": "Early morning on empty stomach",
-    "duration": "15-30 days or as prescribed",
-    "takeWith": "Warm water, honey, or buttermilk",
-    "storage": "Store in cool, dry place away from direct sunlight",
-    "contraindications":
-        "Avoid during pregnancy and breastfeeding. Not recommended for children below 5 years. People with low blood sugar should use with caution...",
-    "sideEffects":
-        "Excessive consumption may cause nausea, vomiting, or diarrhea. May cause skin irritation in sensitive individuals...",
-    "relatedDiseases": [
-      {
-        "id": "dis_001",
-        "name": "Diabetes Mellitus",
-        "tamilName": "நீரிழிவு நோய்",
-        "description":
-            "Chronic condition characterized by high blood sugar levels"
-      },
-      {
-        "id": "dis_002",
-        "name": "Eczema",
-        "tamilName": "சொறி சிரங்கு",
-        "description": "Inflammatory skin condition causing itching and rashes"
-      },
-    ]
-  };
+  Map<String, dynamic>? _medicineData;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Get the medicine data passed from the previous screen
+    if (_medicineData == null) {
+      final args = ModalRoute.of(context)?.settings.arguments;
+      if (args != null && args is Map<String, dynamic>) {
+        setState(() {
+          _medicineData = _transformMedicineData(args);
+        });
+      }
+    }
+  }
+
+  // Transform Firestore data to match the expected format
+  Map<String, dynamic> _transformMedicineData(
+      Map<String, dynamic> firestoreData) {
+    return {
+      "id": firestoreData['id'] ?? '',
+      "englishName": firestoreData['Name'] ?? 'Unknown Medicine',
+      "tamilName": firestoreData['Name_Tamil'] ?? '',
+      "pronunciation": firestoreData['Pronunciation'] ?? '',
+      "images": _parseImages(firestoreData['Imagssse']),
+      "description": firestoreData['Description'] ?? 'No description available',
+      "description_tamil": firestoreData['Description_Tamil'] ?? '',
+      "scientificName": firestoreData['Scientific_Name'] ?? 'N/A',
+      "parts_used": firestoreData['Parts_Used'] ?? 'N/A',
+      "parts_used_tamil": firestoreData['Parts_Used_Tamil'] ?? '',
+      "dosage": _parseDosage(firestoreData),
+      "dosage_tamil": firestoreData['Dosage_Tamil'] ?? '',
+      "relatedDiseases": firestoreData['Related_Diseases'] ?? [],
+    };
+  }
+
+  List<String> _parseImages(dynamic imageData) {
+    if (imageData == null) return [];
+
+    if (imageData is String) {
+      if (imageData.isEmpty) return [];
+      if (imageData.contains(',')) {
+        return imageData
+            .split(',')
+            .map((e) => e.trim())
+            .where((e) => e.isNotEmpty)
+            .toList();
+      }
+      return [imageData];
+    }
+
+    if (imageData is List) {
+      return imageData
+          .map((e) => e.toString())
+          .where((e) => e.isNotEmpty)
+          .toList();
+    }
+
+    return [];
+  }
+
+  Map<String, dynamic> _parseDosage(Map<String, dynamic> data) {
+    final dosageStr = data['Dosage'] ?? '';
+
+    return {
+      "adult": dosageStr.isNotEmpty ? dosageStr : "As prescribed",
+      "children": data['Dosage_Children'] ?? "Consult practitioner",
+    };
+  }
+
+  List<String> _parsePreparation(dynamic preparationData) {
+    if (preparationData == null) return [];
+
+    if (preparationData is String) {
+      if (preparationData.isEmpty) return [];
+      return preparationData
+          .split(RegExp(r'[.\n]'))
+          .map((e) => e.trim())
+          .where((e) => e.isNotEmpty)
+          .toList();
+    }
+
+    if (preparationData is List) {
+      return preparationData
+          .map((e) => e.toString())
+          .where((e) => e.isNotEmpty)
+          .toList();
+    }
+
+    return [];
   }
 
   @override
@@ -92,6 +124,28 @@ class _MedicineDetailScreenState extends State<MedicineDetailScreen>
 
   @override
   Widget build(BuildContext context) {
+    if (_medicineData == null) {
+      return Scaffold(
+        backgroundColor: AppTheme.lightTheme.scaffoldBackgroundColor,
+        appBar: AppBar(
+          backgroundColor: AppTheme.lightTheme.primaryColor,
+          leading: IconButton(
+            onPressed: () => Navigator.pop(context),
+            icon: CustomIconWidget(
+              iconName: 'arrow_back',
+              color: AppTheme.lightTheme.colorScheme.onPrimary,
+              size: 6.w,
+            ),
+          ),
+        ),
+        body: Center(
+          child: CircularProgressIndicator(
+            color: AppTheme.lightTheme.primaryColor,
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       backgroundColor: AppTheme.lightTheme.scaffoldBackgroundColor,
       body: CustomScrollView(
@@ -99,9 +153,9 @@ class _MedicineDetailScreenState extends State<MedicineDetailScreen>
           _buildSliverAppBar(),
           SliverToBoxAdapter(
             child: MedicineHeaderWidget(
-              englishName: _medicineData['englishName'],
-              tamilName: _medicineData['tamilName'],
-              pronunciation: _medicineData['pronunciation'],
+              englishName: _medicineData!['englishName'],
+              tamilName: _medicineData!['tamilName'],
+              pronunciation: _medicineData!['pronunciation'],
               onShareTap: _shareMedicine,
             ),
           ),
@@ -119,11 +173,22 @@ class _MedicineDetailScreenState extends State<MedicineDetailScreen>
                 labelStyle: AppTheme.lightTheme.textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.w600,
                 ),
-                tabs: const [
-                  Tab(text: 'Overview'),
-                  Tab(text: 'Usage'),
-                  Tab(text: 'Diseases'),
-                  Tab(text: 'Precautions'),
+                tabs: [
+                  Tab(
+                      text: _currentLanguage == 'english'
+                          ? 'Overview'
+                          : 'கண்ணோட்டம்'),
+                  Tab(
+                      text:
+                          _currentLanguage == 'english' ? 'Usage' : 'பயன்பாடு'),
+                  Tab(
+                      text: _currentLanguage == 'english'
+                          ? 'Diseases'
+                          : 'நோய்கள்'),
+                  Tab(
+                      text: _currentLanguage == 'english'
+                          ? 'Precautions'
+                          : 'முன்னெச்சரிக்கைகள்'),
                 ],
               ),
             ),
@@ -135,19 +200,23 @@ class _MedicineDetailScreenState extends State<MedicineDetailScreen>
               children: [
                 MedicineTabContentWidget(
                     tabType: 'overview',
-                    medicineData: _medicineData,
+                    medicineData: _medicineData!,
+                    currentLanguage: _currentLanguage,
                     onDiseaseCardTap: _navigateToDisease),
                 MedicineTabContentWidget(
                     tabType: 'usage',
-                    medicineData: _medicineData,
+                    medicineData: _medicineData!,
+                    currentLanguage: _currentLanguage,
                     onDiseaseCardTap: _navigateToDisease),
                 MedicineTabContentWidget(
                     tabType: 'diseases',
-                    medicineData: _medicineData,
+                    medicineData: _medicineData!,
+                    currentLanguage: _currentLanguage,
                     onDiseaseCardTap: _navigateToDisease),
                 MedicineTabContentWidget(
                     tabType: 'precautions',
-                    medicineData: _medicineData,
+                    medicineData: _medicineData!,
+                    currentLanguage: _currentLanguage,
                     onDiseaseCardTap: _navigateToDisease),
               ],
             ),
@@ -158,6 +227,8 @@ class _MedicineDetailScreenState extends State<MedicineDetailScreen>
   }
 
   SliverAppBar _buildSliverAppBar() {
+    final images = (_medicineData!['images'] as List).cast<String>();
+
     return SliverAppBar(
       systemOverlayStyle: SystemUiOverlayStyle.light,
       expandedHeight: 35.h,
@@ -216,23 +287,54 @@ class _MedicineDetailScreenState extends State<MedicineDetailScreen>
       ],
       flexibleSpace: FlexibleSpaceBar(
         stretchModes: const [StretchMode.zoomBackground, StretchMode.fadeTitle],
-        background: MedicineImageGalleryWidget(
-          imageUrls: (_medicineData['images'] as List).cast<String>(),
-          medicineName: _medicineData['englishName'],
+        background: images.isNotEmpty
+            ? MedicineImageGalleryWidget(
+                imageUrls: images,
+                medicineName: _medicineData!['englishName'],
+              )
+            : Container(
+                color: Colors.grey[200],
+                child: Center(
+                  child: Icon(
+                    Icons.image_not_supported,
+                    size: 15.w,
+                    color: Colors.grey[400],
+                  ),
+                ),
+              ),
+      ),
+    );
+  }
+
+  void _shareMedicine() {
+    final medicineName = _currentLanguage == 'english'
+        ? _medicineData!['englishName']
+        : _medicineData!['tamilName'];
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          _currentLanguage == 'english'
+              ? 'Sharing $medicineName...'
+              : '$medicineName பகிர்கிறது...',
         ),
       ),
     );
   }
 
-  // Action handlers remain the same
-  void _shareMedicine() {/* ... */}
   void _toggleLanguage() {
     setState(() {
       _currentLanguage = _currentLanguage == 'english' ? 'tamil' : 'english';
-    }); /* ... */
+    });
   }
 
-  void _navigateToDisease(String diseaseId) {/* ... */}
+  void _navigateToDisease(String diseaseId) {
+    Navigator.pushNamed(
+      context,
+      '/disease-detail-screen',
+      arguments: {'diseaseId': diseaseId},
+    );
+  }
 }
 
 // Helper class to make the TabBar sticky

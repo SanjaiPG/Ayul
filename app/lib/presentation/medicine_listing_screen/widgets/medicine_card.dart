@@ -7,7 +7,6 @@ class MedicineCard extends StatelessWidget {
   final Map<String, dynamic> medicine;
   final String currentLanguage;
   final Function(Map<String, dynamic>) onTap;
-  final Function(Map<String, dynamic>) onBookmark;
   final Function(Map<String, dynamic>) onLongPress;
 
   const MedicineCard({
@@ -15,7 +14,6 @@ class MedicineCard extends StatelessWidget {
     required this.medicine,
     required this.currentLanguage,
     required this.onTap,
-    required this.onBookmark,
     required this.onLongPress,
   }) : super(key: key);
 
@@ -31,7 +29,7 @@ class MedicineCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
+              color: Colors.black.withOpacity(0.05),
               blurRadius: 8,
               offset: Offset(0, 2),
             ),
@@ -109,34 +107,8 @@ class MedicineCard extends StatelessWidget {
                   ],
                 ),
               ),
-              // Action Buttons
               Column(
                 children: [
-                  // Bookmark Button
-                  GestureDetector(
-                    onTap: () => onBookmark(medicine),
-                    child: Container(
-                      padding: EdgeInsets.all(2.w),
-                      decoration: BoxDecoration(
-                        color: medicine['isBookmarked'] == true
-                            ? AppTheme.lightTheme.primaryColor
-                                .withValues(alpha: 0.1)
-                            : Colors.transparent,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: CustomIconWidget(
-                        iconName: medicine['isBookmarked'] == true
-                            ? 'bookmark'
-                            : 'bookmark_border',
-                        color: medicine['isBookmarked'] == true
-                            ? AppTheme.lightTheme.primaryColor
-                            : AppTheme.lightTheme.colorScheme.onSurfaceVariant,
-                        size: 5.w,
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 2.h),
-                  // View Details Button
                   ElevatedButton(
                     onPressed: () => onTap(medicine),
                     style: ElevatedButton.styleFrom(

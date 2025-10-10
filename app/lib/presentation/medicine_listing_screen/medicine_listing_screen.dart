@@ -21,7 +21,6 @@ class _MedicineListingScreenState extends State<MedicineListingScreen> {
   Map<String, dynamic> _currentFilters = {};
   bool _isLoading = false;
 
-  // Mock data for medicines
   final List<Map<String, dynamic>> _allMedicines = [
     {
       'id': '1',
@@ -32,9 +31,8 @@ class _MedicineListingScreenState extends State<MedicineListingScreen> {
       'tamilDescription':
           'மன அழுத்தம் குறைக்கவும் ஆற்றல் அதிகரிக்கவும் பயன்படும் சக்திவாய்ந்த மூலிகை.',
       'image':
-          'https://images.pexels.com/photos/4021775/pexels-photo-4021775.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+          'https://images.pexels.com/photos/4021775/pexels-photo-4021775.jpeg',
       'relatedDiseases': 12,
-      'isBookmarked': false,
       'category': 'herbal',
       'bodySystem': 'nervous',
       'preparation': 'powder',
@@ -48,9 +46,8 @@ class _MedicineListingScreenState extends State<MedicineListingScreen> {
       'tamilDescription':
           'செரிமான ஆரோக்கியத்திற்கான மூன்று பழங்களின் பாரம்பரிய ஆயுர்வேத கலவை.',
       'image':
-          'https://images.pexels.com/photos/4021775/pexels-photo-4021775.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+          'https://images.pexels.com/photos/4021775/pexels-photo-4021775.jpeg',
       'relatedDiseases': 8,
-      'isBookmarked': true,
       'category': 'compound',
       'bodySystem': 'digestive',
       'preparation': 'powder',
@@ -64,9 +61,8 @@ class _MedicineListingScreenState extends State<MedicineListingScreen> {
       'tamilDescription':
           'நினைவாற்றல் மற்றும் அறிவாற்றல் செயல்பாட்டை மேம்படுத்தும் மூளை டானிக் மூலிகை.',
       'image':
-          'https://images.pexels.com/photos/7195133/pexels-photo-7195133.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+          'https://images.pexels.com/photos/7195133/pexels-photo-7195133.jpeg',
       'relatedDiseases': 15,
-      'isBookmarked': false,
       'category': 'herbal',
       'bodySystem': 'nervous',
       'preparation': 'oil',
@@ -80,9 +76,8 @@ class _MedicineListingScreenState extends State<MedicineListingScreen> {
       'tamilDescription':
           'சக்திவாய்ந்த அழற்சி எதிர்ப்பு மற்றும் குணப்படுத்தும் பண்புகளைக் கொண்ட தங்க மசாலா.',
       'image':
-          'https://images.pexels.com/photos/4198015/pexels-photo-4198015.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+          'https://images.pexels.com/photos/4198015/pexels-photo-4198015.jpeg',
       'relatedDiseases': 20,
-      'isBookmarked': true,
       'category': 'herbal',
       'bodySystem': 'circulatory',
       'preparation': 'powder',
@@ -96,9 +91,8 @@ class _MedicineListingScreenState extends State<MedicineListingScreen> {
       'tamilDescription':
           'பாக்டீரியா எதிர்ப்பு மற்றும் பூஞ்சை எதிர்ப்பு பண்புகளைக் கொண்ட பல்துறை மருத்துவ மரம்.',
       'image':
-          'https://images.pexels.com/photos/6207734/pexels-photo-6207734.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+          'https://images.pexels.com/photos/6207734/pexels-photo-6207734.jpeg',
       'relatedDiseases': 18,
-      'isBookmarked': false,
       'category': 'herbal',
       'bodySystem': 'respiratory',
       'preparation': 'decoction',
@@ -112,9 +106,8 @@ class _MedicineListingScreenState extends State<MedicineListingScreen> {
       'tamilDescription':
           'செரிமானம் மற்றும் சுவாச ஆரோக்கியத்திற்கு சிறந்த வெப்பமூட்டும் மசாலா.',
       'image':
-          'https://images.pexels.com/photos/1022385/pexels-photo-1022385.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+          'https://images.pexels.com/photos/1022385/pexels-photo-1022385.jpeg',
       'relatedDiseases': 10,
-      'isBookmarked': false,
       'category': 'herbal',
       'bodySystem': 'digestive',
       'preparation': 'decoction',
@@ -137,7 +130,6 @@ class _MedicineListingScreenState extends State<MedicineListingScreen> {
   }
 
   void _onVoiceSearch() {
-    // Voice search functionality would be implemented here
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
@@ -168,7 +160,6 @@ class _MedicineListingScreenState extends State<MedicineListingScreen> {
   void _updateActiveFilters() {
     _activeFilters.clear();
 
-    // Add medicine type filters
     if (_currentFilters['medicineTypes'] != null) {
       final types = _currentFilters['medicineTypes'] as List<String>;
       for (String type in types) {
@@ -181,7 +172,6 @@ class _MedicineListingScreenState extends State<MedicineListingScreen> {
       }
     }
 
-    // Add body system filters
     if (_currentFilters['bodySystems'] != null) {
       final systems = _currentFilters['bodySystems'] as List<String>;
       for (String system in systems) {
@@ -208,56 +198,45 @@ class _MedicineListingScreenState extends State<MedicineListingScreen> {
         .map((f) => f['id'].toString().replaceFirst('system_', ''))
         .toList();
 
-    if (typeFilters.isNotEmpty) {
-      _currentFilters['medicineTypes'] = typeFilters;
-    }
-    if (systemFilters.isNotEmpty) {
+    if (typeFilters.isNotEmpty) _currentFilters['medicineTypes'] = typeFilters;
+    if (systemFilters.isNotEmpty)
       _currentFilters['bodySystems'] = systemFilters;
-    }
   }
 
   void _filterMedicines() {
     setState(() {
       _filteredMedicines = _allMedicines.where((medicine) {
-        // Search filter
         if (_searchQuery.isNotEmpty) {
           final searchLower = _searchQuery.toLowerCase();
-          final nameMatch =
-              medicine['name'].toString().toLowerCase().contains(searchLower);
-          final tamilNameMatch = medicine['tamilName']
-              .toString()
-              .toLowerCase()
-              .contains(searchLower);
-          final descMatch = medicine['description']
-              .toString()
-              .toLowerCase()
-              .contains(searchLower);
-
-          if (!nameMatch && !tamilNameMatch && !descMatch) {
+          if (!medicine['name']
+                  .toString()
+                  .toLowerCase()
+                  .contains(searchLower) &&
+              !medicine['tamilName']
+                  .toString()
+                  .toLowerCase()
+                  .contains(searchLower) &&
+              !medicine['description']
+                  .toString()
+                  .toLowerCase()
+                  .contains(searchLower)) {
             return false;
           }
         }
 
-        // Type filter
         if (_currentFilters['medicineTypes'] != null) {
           final types = _currentFilters['medicineTypes'] as List<String>;
-          if (!types.contains(medicine['category'])) {
-            return false;
-          }
+          if (!types.contains(medicine['category'])) return false;
         }
 
-        // Body system filter
         if (_currentFilters['bodySystems'] != null) {
           final systems = _currentFilters['bodySystems'] as List<String>;
-          if (!systems.contains(medicine['bodySystem'])) {
-            return false;
-          }
+          if (!systems.contains(medicine['bodySystem'])) return false;
         }
 
         return true;
       }).toList();
 
-      // Apply sorting
       if (_currentFilters['sortBy'] != null) {
         final sortBy = _currentFilters['sortBy'] as String;
         switch (sortBy) {
@@ -310,32 +289,6 @@ class _MedicineListingScreenState extends State<MedicineListingScreen> {
         arguments: medicine);
   }
 
-  void _onBookmarkToggle(Map<String, dynamic> medicine) {
-    setState(() {
-      final index = _allMedicines.indexWhere((m) => m['id'] == medicine['id']);
-      if (index != -1) {
-        _allMedicines[index]['isBookmarked'] =
-            !_allMedicines[index]['isBookmarked'];
-        _filterMedicines();
-      }
-    });
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          medicine['isBookmarked'] == true
-              ? (_currentLanguage == 'Tamil'
-                  ? 'புத்தகக்குறியிலிருந்து அகற்றப்பட்டது'
-                  : 'Removed from bookmarks')
-              : (_currentLanguage == 'Tamil'
-                  ? 'புத்தகக்குறியில் சேர்க்கப்பட்டது'
-                  : 'Added to bookmarks'),
-        ),
-        duration: Duration(seconds: 2),
-      ),
-    );
-  }
-
   void _onMedicineLongPress(Map<String, dynamic> medicine) {
     showModalBottomSheet(
       context: context,
@@ -346,44 +299,18 @@ class _MedicineListingScreenState extends State<MedicineListingScreen> {
           children: [
             ListTile(
               leading: CustomIconWidget(
-                iconName: medicine['isBookmarked'] == true
-                    ? 'bookmark_remove'
-                    : 'bookmark_add',
-                color: AppTheme.lightTheme.primaryColor,
-                size: 6.w,
-              ),
-              title: Text(
-                medicine['isBookmarked'] == true
-                    ? (_currentLanguage == 'Tamil'
-                        ? 'புத்தகக்குறியிலிருந்து அகற்று'
-                        : 'Remove from Favorites')
-                    : (_currentLanguage == 'Tamil'
-                        ? 'புத்தகக்குறியில் சேர்'
-                        : 'Add to Favorites'),
-              ),
-              onTap: () {
-                Navigator.pop(context);
-                _onBookmarkToggle(medicine);
-              },
-            ),
-            ListTile(
-              leading: CustomIconWidget(
                 iconName: 'share',
                 color: AppTheme.lightTheme.primaryColor,
                 size: 6.w,
               ),
-              title: Text(
-                _currentLanguage == 'Tamil' ? 'பகிர்' : 'Share',
-              ),
+              title: Text(_currentLanguage == 'Tamil' ? 'பகிர்' : 'Share'),
               onTap: () {
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text(
-                      _currentLanguage == 'Tamil'
-                          ? 'பகிர்வு விரைவில் வரும்'
-                          : 'Share feature coming soon',
-                    ),
+                    content: Text(_currentLanguage == 'Tamil'
+                        ? 'பகிர்வு விரைவில் வரும்'
+                        : 'Share feature coming soon'),
                   ),
                 );
               },
@@ -394,11 +321,9 @@ class _MedicineListingScreenState extends State<MedicineListingScreen> {
                 color: AppTheme.lightTheme.primaryColor,
                 size: 6.w,
               ),
-              title: Text(
-                _currentLanguage == 'Tamil'
-                    ? 'தொடர்புடைய நோய்கள்'
-                    : 'View Related Diseases',
-              ),
+              title: Text(_currentLanguage == 'Tamil'
+                  ? 'தொடர்புடைய நோய்கள்'
+                  : 'View Related Diseases'),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.pushNamed(context, '/disease-listing-screen',
@@ -434,13 +359,8 @@ class _MedicineListingScreenState extends State<MedicineListingScreen> {
   }
 
   Future<void> _onRefresh() async {
-    setState(() {
-      _isLoading = true;
-    });
-
-    // Simulate refresh delay
+    setState(() => _isLoading = true);
     await Future.delayed(Duration(seconds: 1));
-
     setState(() {
       _isLoading = false;
       _filteredMedicines = List.from(_allMedicines);
@@ -480,14 +400,11 @@ class _MedicineListingScreenState extends State<MedicineListingScreen> {
           ),
           IconButton(
             onPressed: () {
-              // Global search functionality
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text(
-                    _currentLanguage == 'Tamil'
-                        ? 'உலகளாவிய தேடல் விரைவில் வரும்'
-                        : 'Global search coming soon',
-                  ),
+                  content: Text(_currentLanguage == 'Tamil'
+                      ? 'உலகளாவிய தேடல் விரைவில் வரும்'
+                      : 'Global search coming soon'),
                 ),
               );
             },
@@ -501,21 +418,16 @@ class _MedicineListingScreenState extends State<MedicineListingScreen> {
       ),
       body: Column(
         children: [
-          // Search Bar
           MedicineSearchBar(
             onSearchChanged: _onSearchChanged,
             onVoiceSearch: _onVoiceSearch,
             currentLanguage: _currentLanguage,
           ),
-
-          // Filter Chips
           FilterChipsRow(
             activeFilters: _activeFilters,
             onFilterRemoved: _onFilterRemoved,
             currentLanguage: _currentLanguage,
           ),
-
-          // Medicine List
           Expanded(
             child: _isLoading
                 ? Center(
@@ -536,7 +448,6 @@ class _MedicineListingScreenState extends State<MedicineListingScreen> {
                               medicine: _filteredMedicines[index],
                               currentLanguage: _currentLanguage,
                               onTap: _onMedicineTap,
-                              onBookmark: _onBookmarkToggle,
                               onLongPress: _onMedicineLongPress,
                             );
                           },

@@ -11,8 +11,7 @@ import './widgets/navigation_card_widget.dart';
 import './widgets/offline_indicator_widget.dart';
 import './widgets/quick_access_card_widget.dart';
 import './widgets/disease_questionnaire_widget.dart';
-import 'dart:html' as html;
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:url_launcher/url_launcher.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -455,165 +454,164 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  void openPdfFromUrl(String url) {
-  if (kIsWeb) {
-    html.window.open(url, '_blank');
+// Your Books Tab Widget
+  Future<void> openPdfFromUrl(String url) async {
+    final Uri pdfUri = Uri.parse(url);
+    if (await canLaunchUrl(pdfUri)) {
+      await launchUrl(pdfUri, mode: LaunchMode.externalApplication);
+    } else {
+      throw 'Could not launch $url';
+    }
   }
-}
 
-// Method to open PDF in iframe (alternative: just open in new tab)
-void openPdfInIframe(String url) {
-  if (kIsWeb) {
-    // Simple approach: open directly in new tab
-    html.window.open(url, '_blank');
+  Future<void> downloadPdf(String url, String filename) async {
+    final Uri pdfUri = Uri.parse(url);
+    if (await canLaunchUrl(pdfUri)) {
+      await launchUrl(pdfUri, mode: LaunchMode.externalApplication);
+    } else {
+      throw 'Could not launch $url';
+    }
   }
-}
-
-// Method to download PDF
-void downloadPdf(String url, String filename) {
-  if (kIsWeb) {
-    final anchor = html.AnchorElement(href: url)
-      ..setAttribute('download', filename)
-      ..click();
-  }
-}
 
 // Your Books Tab Widget
-Widget _buildBooksTab() {
-  return SingleChildScrollView(
-    padding: const EdgeInsets.all(16.0),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'My Books Collection',
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 20),
-        
-        // Example Book Card 1
-        _buildBookCard(
-          title: 'Anatomy 1',
-          author: 'John Doe',
-          pdfUrl: 'https://drive.google.com/file/d/1X-grVKBKgSwkKMNuYYSRQCHGU2nwB-tN/view?usp=sharing',
-          coverColor: Colors.blue,
-        ),
-        
-        const SizedBox(height: 16),
-        
-        // Example Book Card 2
-        _buildBookCard(
-          title: 'Anatomy 2',
-          author: 'Jane Smith',
-          pdfUrl: 'https://drive.google.com/file/d/1X-grVKBKgSwkKMNuYYSRQCHGU2nwB-tN/view?usp=sharing',
-          coverColor: Colors.green,
-        ),
-        
-        const SizedBox(height: 16),
-        
-        // Example Book Card 3
-        _buildBookCard(
-          title: 'Anatomy 3',
-          author: 'Bob Johnson',
-          pdfUrl: 'https://drive.google.com/file/d/1X-grVKBKgSwkKMNuYYSRQCHGU2nwB-tN/view?usp=sharing',
-          coverColor: Colors.orange,
-        ),
-      ],
-    ),
-  );
-}
-
-// Helper widget to build individual book cards
-Widget _buildBookCard({
-  required String title,
-  required String author,
-  required String pdfUrl,
-  required Color coverColor,
-}) {
-  return Card(
-    elevation: 3,
-    child: Padding(
+  Widget _buildBooksTab() {
+    return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Book Cover Thumbnail
-          Container(
-            width: 80,
-            height: 100,
-            decoration: BoxDecoration(
-              color: coverColor,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: const Icon(
-              Icons.book,
-              color: Colors.white,
-              size: 40,
+          const Text(
+            'My Books Collection',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
             ),
           ),
-          
-          const SizedBox(width: 16),
-          
-          // Book Details
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  author,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                
-                // Action Buttons
-                Wrap(
-                  spacing: 8,
-                  children: [
-                    ElevatedButton.icon(
-                      onPressed: () => openPdfFromUrl(pdfUrl),
-                      icon: const Icon(Icons.open_in_new, size: 16),
-                      label: const Text('Open'),
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
-                        ),
-                      ),
-                    ),
-                    OutlinedButton.icon(
-                      onPressed: () => downloadPdf(pdfUrl, '$title.pdf'),
-                      icon: const Icon(Icons.download, size: 16),
-                      label: const Text('Download'),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+          const SizedBox(height: 20),
+
+          // Example Book Card 1
+          _buildBookCard(
+            title: 'A 1',
+            author: 'John Doe',
+            pdfUrl:
+                'https://drive.google.com/file/d/1X-grVKBKgSwkKMNuYYSRQCHGU2nwB-tN/view',
+            coverColor: Colors.blue,
+          ),
+
+          const SizedBox(height: 16),
+
+          // Example Book Card 2
+          _buildBookCard(
+            title: 'A 2',
+            author: 'Jane Smith',
+            pdfUrl:
+                'https://drive.google.com/file/d/1X-grVKBKgSwkKMNuYYSRQCHGU2nwB-tN/view',
+            coverColor: Colors.green,
+          ),
+
+          const SizedBox(height: 16),
+
+          // Example Book Card 3
+          _buildBookCard(
+            title: 'A 3',
+            author: 'Bob Johnson',
+            pdfUrl:
+                'https://drive.google.com/file/d/1X-grVKBKgSwkKMNuYYSRQCHGU2nwB-tN/view',
+            coverColor: Colors.orange,
           ),
         ],
       ),
-    ),
-  );
-}
+    );
+  }
+
+// Helper widget to build individual book cards
+  Widget _buildBookCard({
+    required String title,
+    required String author,
+    required String pdfUrl,
+    required Color coverColor,
+  }) {
+    return Card(
+      elevation: 3,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Row(
+          children: [
+            // Book Cover Thumbnail
+            Container(
+              width: 80,
+              height: 100,
+              decoration: BoxDecoration(
+                color: coverColor,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(
+                Icons.book,
+                color: Colors.white,
+                size: 40,
+              ),
+            ),
+
+            const SizedBox(width: 16),
+
+            // Book Details
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    author,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Action Buttons
+                  Wrap(
+                    spacing: 8,
+                    children: [
+                      ElevatedButton.icon(
+                        onPressed: () => openPdfFromUrl(pdfUrl),
+                        icon: const Icon(Icons.open_in_new, size: 16),
+                        label: const Text('Open'),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
+                        ),
+                      ),
+                      OutlinedButton.icon(
+                        onPressed: () => downloadPdf(pdfUrl, '$title.pdf'),
+                        icon: const Icon(Icons.download, size: 16),
+                        label: const Text('Download'),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   Widget _buildFindDiseaseTab() {
     // ... This widget remains unchanged

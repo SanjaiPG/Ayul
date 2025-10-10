@@ -7,6 +7,8 @@ import './widgets/filter_chips_row.dart';
 import './widgets/medicine_card.dart';
 import './widgets/medicine_search_bar.dart';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class MedicineListingScreen extends StatefulWidget {
   const MedicineListingScreen({Key? key}) : super(key: key);
 
@@ -21,105 +23,60 @@ class _MedicineListingScreenState extends State<MedicineListingScreen> {
   Map<String, dynamic> _currentFilters = {};
   bool _isLoading = false;
 
-  final List<Map<String, dynamic>> _allMedicines = [
-    {
-      'id': '1',
-      'name': 'Ashwagandha',
-      'tamilName': 'அஸ்வகந்தா',
-      'description':
-          'A powerful adaptogenic herb used for stress relief and energy enhancement.',
-      'tamilDescription':
-          'மன அழுத்தம் குறைக்கவும் ஆற்றல் அதிகரிக்கவும் பயன்படும் சக்திவாய்ந்த மூலிகை.',
-      'image':
-          'https://images.pexels.com/photos/4021775/pexels-photo-4021775.jpeg',
-      'relatedDiseases': 12,
-      'category': 'herbal',
-      'bodySystem': 'nervous',
-      'preparation': 'powder',
-    },
-    {
-      'id': '2',
-      'name': 'Triphala',
-      'tamilName': 'திரிபலா',
-      'description':
-          'A traditional Ayurvedic formulation of three fruits for digestive health.',
-      'tamilDescription':
-          'செரிமான ஆரோக்கியத்திற்கான மூன்று பழங்களின் பாரம்பரிய ஆயுர்வேத கலவை.',
-      'image':
-          'https://images.pexels.com/photos/4021775/pexels-photo-4021775.jpeg',
-      'relatedDiseases': 8,
-      'category': 'compound',
-      'bodySystem': 'digestive',
-      'preparation': 'powder',
-    },
-    {
-      'id': '3',
-      'name': 'Brahmi',
-      'tamilName': 'பிரம்மி',
-      'description':
-          'A brain tonic herb that enhances memory and cognitive function.',
-      'tamilDescription':
-          'நினைவாற்றல் மற்றும் அறிவாற்றல் செயல்பாட்டை மேம்படுத்தும் மூளை டானிக் மூலிகை.',
-      'image':
-          'https://images.pexels.com/photos/7195133/pexels-photo-7195133.jpeg',
-      'relatedDiseases': 15,
-      'category': 'herbal',
-      'bodySystem': 'nervous',
-      'preparation': 'oil',
-    },
-    {
-      'id': '4',
-      'name': 'Turmeric',
-      'tamilName': 'மஞ்சள்',
-      'description':
-          'A golden spice with powerful anti-inflammatory and healing properties.',
-      'tamilDescription':
-          'சக்திவாய்ந்த அழற்சி எதிர்ப்பு மற்றும் குணப்படுத்தும் பண்புகளைக் கொண்ட தங்க மசாலா.',
-      'image':
-          'https://images.pexels.com/photos/4198015/pexels-photo-4198015.jpeg',
-      'relatedDiseases': 20,
-      'category': 'herbal',
-      'bodySystem': 'circulatory',
-      'preparation': 'powder',
-    },
-    {
-      'id': '5',
-      'name': 'Neem',
-      'tamilName': 'வேப்பம்',
-      'description':
-          'A versatile medicinal tree with antibacterial and antifungal properties.',
-      'tamilDescription':
-          'பாக்டீரியா எதிர்ப்பு மற்றும் பூஞ்சை எதிர்ப்பு பண்புகளைக் கொண்ட பல்துறை மருத்துவ மரம்.',
-      'image':
-          'https://images.pexels.com/photos/6207734/pexels-photo-6207734.jpeg',
-      'relatedDiseases': 18,
-      'category': 'herbal',
-      'bodySystem': 'respiratory',
-      'preparation': 'decoction',
-    },
-    {
-      'id': '6',
-      'name': 'Ginger',
-      'tamilName': 'இஞ்சி',
-      'description':
-          'A warming spice excellent for digestion and respiratory health.',
-      'tamilDescription':
-          'செரிமானம் மற்றும் சுவாச ஆரோக்கியத்திற்கு சிறந்த வெப்பமூட்டும் மசாலா.',
-      'image':
-          'https://images.pexels.com/photos/1022385/pexels-photo-1022385.jpeg',
-      'relatedDiseases': 10,
-      'category': 'herbal',
-      'bodySystem': 'digestive',
-      'preparation': 'decoction',
-    },
-  ];
-
+  List<Map<String, dynamic>> _allMedicines = [];
   List<Map<String, dynamic>> _filteredMedicines = [];
+
+  Future<void> _fetchMedicines() async {
+    setState(() => _isLoading = true);
+
+    try {
+      final snapshot =
+          await FirebaseFirestore.instance.collection('SiddhaMedicines').get();
+
+      _allMedicines = snapshot.docs.map((doc) {
+        return {
+          'id': doc.id,
+          'Name': doc['Name'] ?? '',
+          'Name_Tamil': doc['Name_Tamil'] ?? '',
+          'Description': doc['Description'] ?? '',
+          'Description_Tamil': doc['Description_Tamil'] ?? '',
+          'Dosage': doc['Dosage'] ?? '',
+          'Dosage_Tamil': doc['Dosage_Tamil'] ?? '',
+          'Image': doc['Image'] ?? '',
+          'Parts_Used': doc['Parts_Used'] ?? '',
+          'Parts_Used_Tamil': doc['Parts_Used_Tamil'] ?? '',
+          'Possible_Side_Effects': doc['Possible_Side_Effects'] ?? '',
+          'Possible_Side_Effects_Tamil':
+              doc['Possible_Side_Effects_Tamil'] ?? '',
+          'Precautions': doc['Precautions'] ?? '',
+          'Precautions_Tamil': doc['Precautions_Tamil'] ?? '',
+          'Scientific_Name': doc['Scientific_Name'] ?? '',
+          'Type_Of_Medicine': doc['Type_Of_Medicine'] ?? '',
+          'Type_Of_Medicine_Tamil': doc['Type_Of_Medicine_Tamil'] ?? '',
+        };
+      }).toList();
+
+      _filteredMedicines = List.from(_allMedicines);
+
+      // Debug: Print the fetched data
+      print('Fetched ${_allMedicines.length} medicines');
+      if (_allMedicines.isNotEmpty) {
+        print('First medicine: ${_allMedicines[0]}');
+      }
+    } catch (e) {
+      print('Error fetching medicines: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error loading medicines: $e')),
+      );
+    }
+
+    setState(() => _isLoading = false);
+  }
 
   @override
   void initState() {
     super.initState();
-    _filteredMedicines = List.from(_allMedicines);
+    _fetchMedicines();
   }
 
   void _onSearchChanged(String query) {
@@ -206,52 +163,70 @@ class _MedicineListingScreenState extends State<MedicineListingScreen> {
   void _filterMedicines() {
     setState(() {
       _filteredMedicines = _allMedicines.where((medicine) {
+        // FIXED: Search filter - use correct field names
         if (_searchQuery.isNotEmpty) {
           final searchLower = _searchQuery.toLowerCase();
-          if (!medicine['name']
-                  .toString()
-                  .toLowerCase()
-                  .contains(searchLower) &&
-              !medicine['tamilName']
-                  .toString()
-                  .toLowerCase()
-                  .contains(searchLower) &&
-              !medicine['description']
-                  .toString()
-                  .toLowerCase()
-                  .contains(searchLower)) {
+          final name = (medicine['Name'] ?? '').toString().toLowerCase();
+          final nameTamil =
+              (medicine['Name_Tamil'] ?? '').toString().toLowerCase();
+          final description =
+              (medicine['Description'] ?? '').toString().toLowerCase();
+          final descriptionTamil =
+              (medicine['Description_Tamil'] ?? '').toString().toLowerCase();
+
+          if (!name.contains(searchLower) &&
+              !nameTamil.contains(searchLower) &&
+              !description.contains(searchLower) &&
+              !descriptionTamil.contains(searchLower)) {
             return false;
           }
         }
 
+        // FIXED: Type filter - use correct field name
         if (_currentFilters['medicineTypes'] != null) {
           final types = _currentFilters['medicineTypes'] as List<String>;
-          if (!types.contains(medicine['category'])) return false;
+          final medicineType =
+              (medicine['Type_Of_Medicine'] ?? '').toString().toLowerCase();
+          if (!types.any((type) => type.toLowerCase() == medicineType)) {
+            return false;
+          }
         }
 
+        // Body system filter - if your Firestore has this field, adjust accordingly
         if (_currentFilters['bodySystems'] != null) {
           final systems = _currentFilters['bodySystems'] as List<String>;
-          if (!systems.contains(medicine['bodySystem'])) return false;
+          // Adjust this field name if you have a body system field in Firestore
+          final bodySystem =
+              (medicine['BodySystem'] ?? '').toString().toLowerCase();
+          if (bodySystem.isNotEmpty &&
+              !systems.any((system) => system.toLowerCase() == bodySystem)) {
+            return false;
+          }
         }
 
         return true;
       }).toList();
 
+      // Sorting
       if (_currentFilters['sortBy'] != null) {
         final sortBy = _currentFilters['sortBy'] as String;
         switch (sortBy) {
           case 'name_asc':
-            _filteredMedicines.sort((a, b) => a['name'].compareTo(b['name']));
+            _filteredMedicines.sort((a, b) => (a['Name'] ?? '')
+                .toString()
+                .compareTo((b['Name'] ?? '').toString()));
             break;
           case 'name_desc':
-            _filteredMedicines.sort((a, b) => b['name'].compareTo(a['name']));
+            _filteredMedicines.sort((a, b) => (b['Name'] ?? '')
+                .toString()
+                .compareTo((a['Name'] ?? '').toString()));
             break;
           case 'popularity':
-            _filteredMedicines.sort(
-                (a, b) => b['relatedDiseases'].compareTo(a['relatedDiseases']));
             break;
         }
       }
+
+      print('Filtered medicines count: ${_filteredMedicines.length}');
     });
   }
 
@@ -262,7 +237,7 @@ class _MedicineListingScreenState extends State<MedicineListingScreen> {
       'animal': 'விலங்கு',
       'compound': 'கலவை',
     };
-    return map[type] ?? type;
+    return map[type.toLowerCase()] ?? type;
   }
 
   String _getTamilSystemName(String system) {
@@ -273,15 +248,23 @@ class _MedicineListingScreenState extends State<MedicineListingScreen> {
       'circulatory': 'இரத்த ஓட்ட',
       'musculoskeletal': 'தசை எலும்பு',
     };
-    return map[system] ?? system;
+    return map[system.toLowerCase()] ?? system;
   }
 
   int _getMedicineCountByType(String type) {
-    return _allMedicines.where((m) => m['category'] == type).length;
+    return _allMedicines
+        .where((m) =>
+            (m['Type_Of_Medicine'] ?? '').toString().toLowerCase() ==
+            type.toLowerCase())
+        .length;
   }
 
   int _getMedicineCountBySystem(String system) {
-    return _allMedicines.where((m) => m['bodySystem'] == system).length;
+    return _allMedicines
+        .where((m) =>
+            (m['BodySystem'] ?? '').toString().toLowerCase() ==
+            system.toLowerCase())
+        .length;
   }
 
   void _onMedicineTap(Map<String, dynamic> medicine) {
@@ -329,7 +312,7 @@ class _MedicineListingScreenState extends State<MedicineListingScreen> {
                 Navigator.pushNamed(context, '/disease-listing-screen',
                     arguments: {
                       'medicineId': medicine['id'],
-                      'medicineName': medicine['name'],
+                      'medicineName': medicine['Name'],
                     });
               },
             ),
@@ -359,12 +342,7 @@ class _MedicineListingScreenState extends State<MedicineListingScreen> {
   }
 
   Future<void> _onRefresh() async {
-    setState(() => _isLoading = true);
-    await Future.delayed(Duration(seconds: 1));
-    setState(() {
-      _isLoading = false;
-      _filteredMedicines = List.from(_allMedicines);
-    });
+    await _fetchMedicines();
   }
 
   @override

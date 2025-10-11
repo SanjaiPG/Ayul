@@ -1,8 +1,11 @@
-// File: lib/screens/home/widgets/disease_questionnaire_widget.dart
-
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 import '../../../../core/app_export.dart';
+// Assuming AppRoutes is located here based on common structure
+import '../../../routes/app_routes.dart';
+// The actual screen import is not strictly necessary here since we use named routes,
+// but included for completeness if using MaterialPageRoute in future.
+// import '../../medicine_detail_screen/medicine_detail_screen.dart';
 
 class DiseaseQuestionnaireWidget extends StatefulWidget {
   final String currentLanguage;
@@ -419,8 +422,18 @@ class _DiseaseQuestionnaireWidgetState
             ),
             ElevatedButton(
               onPressed: () {
-                Navigator.of(context).pop();
-                widget.onMedicineIdentified(recommendedMedicine);
+                Navigator.of(context).pop(); // Close the dialog
+
+                // *** FIX APPLIED: Using the correct route name from AppRoutes ***
+                Navigator.pushNamed(
+                  context,
+                  AppRoutes.medicineListing, // Correct route name
+                  arguments: recommendedMedicine,
+                );
+
+                // The original logic using the callback is replaced by direct navigation.
+                // If the parent widget still needs the data, uncomment the line below.
+                // widget.onMedicineIdentified(recommendedMedicine);
               },
               child: Text(widget.currentLanguage == 'EN'
                   ? 'Learn More'

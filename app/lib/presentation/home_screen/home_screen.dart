@@ -161,7 +161,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     return Scaffold(
       // 🌟 CRITICAL FIX: Setting Scaffold background to transparent
       // allows the global background image (set in main.dart) to show through.
-      backgroundColor: Colors.transparent,
+      backgroundColor: const Color.fromARGB(99, 253, 252, 252),
       body: SafeArea(
         child: Column(
           children: [

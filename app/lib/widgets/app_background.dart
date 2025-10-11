@@ -22,7 +22,7 @@ class AppBackground extends StatelessWidget {
             alignment: Alignment
                 .centerRight, // Adjusts the positioning to keep the mandala pattern visible
             opacity: const AlwaysStoppedAnimation<double>(
-                0.15), // Set opacity for a subtle watermark effect
+                0.9), // Set opacity for a subtle watermark effect
           ),
         ),
 

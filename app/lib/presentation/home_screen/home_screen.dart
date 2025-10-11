@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
-
+import '../medicine_listing_screen/p1.dart';
 import '../../core/app_export.dart';
 import './widgets/body_parts_explorer_widget.dart';
 import './widgets/educational_tips_widget.dart';
@@ -260,43 +260,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ],
           ),
           SizedBox(height: 2.h),
-          // Fake Search Bar
-          GestureDetector(
-            onTap: () {
-              // Navigate to search screen or focus search field
-              _tabController.animateTo(1);
-            },
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.5.h),
-              decoration: BoxDecoration(
-                color: AppTheme.lightTheme.scaffoldBackgroundColor,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color:
-                      AppTheme.lightTheme.colorScheme.outline.withOpacity(0.3),
-                ),
-              ),
-              child: Row(
-                children: [
-                  CustomIconWidget(
-                    iconName: 'search',
-                    color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
-                    size: 20,
-                  ),
-                  SizedBox(width: 3.w),
-                  Text(
-                    _currentLanguage == 'EN'
-                        ? 'Search medicines, diseases...'
-                        : 'மருந்துகள், நோய்களைத் தேடுங்கள்...',
-                    style: TextStyle(
-                      fontSize: 12.sp,
-                      color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+          //fake search box
         ],
       ),
     );
@@ -417,41 +381,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   Widget _buildSearchTab() {
     // ... This widget remains unchanged
-    return Center(
-      child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 8.w),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CustomIconWidget(
-              iconName: 'search',
-              color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
-              size: 64,
-            ),
-            SizedBox(height: 2.h),
-            Text(
-              _currentLanguage == 'EN' ? 'Search Feature' : 'தேடல் அம்சம்',
-              style: TextStyle(
-                fontSize: 18.sp,
-                fontWeight: FontWeight.w600,
-                color: AppTheme.lightTheme.colorScheme.onSurface,
-              ),
-            ),
-            SizedBox(height: 1.h),
-            Text(
-              _currentLanguage == 'EN'
-                  ? 'Coming Soon - Search across medicines, diseases, and body parts'
-                  : 'விரைவில் வரும் - மருந்துகள், நோய்கள் மற்றும் உடல் பாகங்களில் தேடுங்கள்',
-              style: TextStyle(
-                fontSize: 14.sp,
-                color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
-    );
+    return p1();
   }
 
 // Your Books Tab Widget

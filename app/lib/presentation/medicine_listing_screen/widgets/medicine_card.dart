@@ -40,7 +40,7 @@ class MedicineCard extends StatelessWidget {
       child: Container(
         margin: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Color(0x7BFAFAFA),
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(

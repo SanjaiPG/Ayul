@@ -13,16 +13,16 @@ class AppTheme {
   static const Color secondaryVariantLight =
       Color(0xFF5D2E0A); // Darker earth brown
   static const Color accentLight = Color(0xFFDAA520); // Golden yellow
-  static const Color backgroundLight = Color(0xFFFAFAFA); // Soft off-white
-  static const Color surfaceLight = Color(0xFFFFFFFF); // Pure white
+  static const Color backgroundLight = Color(0x7BFAFAFA); // Soft off-white
+  static const Color surfaceLight = Color(0x7BFAFAFA); // Pure white
   static const Color errorLight = Color(0xFFB00020);
   static const Color successLight = Color(0xFF4CAF50); // Standard green
   static const Color warningLight = Color(0xFFFF9800); // Amber
-  static const Color onPrimaryLight = Color(0xFFFFFFFF);
-  static const Color onSecondaryLight = Color(0xFFFFFFFF);
+  static const Color onPrimaryLight = Color(0x7BFAFAFA);
+  static const Color onSecondaryLight = Color(0x7BFAFAFA);
   static const Color onBackgroundLight = Color(0xFF1A1A1A); // Near-black
   static const Color onSurfaceLight = Color(0xFF1A1A1A); // Near-black
-  static const Color onErrorLight = Color(0xFFFFFFFF);
+  static const Color onErrorLight = Color(0x7BFAFAFA);
 
   static const Color primaryDark =
       Color(0xFF4A7C2A); // Lighter forest green for dark mode
@@ -39,14 +39,14 @@ class AppTheme {
   static const Color warningDark = Color(0xFFFF9800); // Amber (same)
   static const Color onPrimaryDark = Color(0xFF000000);
   static const Color onSecondaryDark = Color(0xFF000000);
-  static const Color onBackgroundDark = Color(0xFFFFFFFF);
-  static const Color onSurfaceDark = Color(0xFFFFFFFF);
+  static const Color onBackgroundDark = Color(0x7BFAFAFA);
+  static const Color onSurfaceDark = Color(0x7BFAFAFA);
   static const Color onErrorDark = Color(0xFF000000);
 
   // Additional semantic colors
-  static const Color cardLight = Color(0xFFFFFFFF);
+  static const Color cardLight = Color(0x7BFAFAFA);
   static const Color cardDark = Color(0xFF2D2D2D);
-  static const Color dialogLight = Color(0xFFFFFFFF);
+  static const Color dialogLight = Color(0x7BFAFAFA);
   static const Color dialogDark = Color(0xFF2D2D2D);
 
   // Shadow colors with subtle elevation
@@ -64,7 +64,7 @@ class AppTheme {
   static const Color textSecondaryLight = Color(0xFF666666); // Medium gray
   static const Color textDisabledLight = Color(0xFF999999); // Light gray
 
-  static const Color textPrimaryDark = Color(0xFFFFFFFF); // White
+  static const Color textPrimaryDark = Color(0x7BFAFAFA); // White
   static const Color textSecondaryDark = Color(0xFFB3B3B3); // Light gray
   static const Color textDisabledDark = Color(0xFF666666); // Medium gray
 
@@ -369,7 +369,7 @@ class AppTheme {
       tertiary: accentDark,
       onTertiary: Color(0xFF000000),
       tertiaryContainer: accentDark.withValues(alpha: 0.2),
-      onTertiaryContainer: Color(0xFFFFFFFF),
+      onTertiaryContainer: Color(0x7BFAFAFA),
       error: errorDark,
       onError: onErrorDark,
       surface: surfaceDark,

@@ -26,39 +26,17 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   bool _isOffline = false;
   bool _isRefreshing = false;
 
-  // Mock data for recent content
-  final List<Map<String, dynamic>> _recentContent = [
+  // ✨ NEW: Dedicated entry for the "View All Diseases" card
+  late final List<Map<String, dynamic>> _diseaseQuickAccess = [
     {
-      "id": 1,
-      "title": "Tulsi",
-      "subtitle": "Holy Basil - Natural immunity booster",
-      "type": "medicine",
-      "image":
-          "https://images.pexels.com/photos/4198015/pexels-photo-4198015.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-    },
-    {
-      "id": 2,
-      "title": "Diabetes",
-      "subtitle": "மதுமேகம் - Blood sugar management",
+      "id": 99,
+      "title":
+          _currentLanguage == 'EN' ? "Explore Diseases" : "நோய்களை கண்டறியவும்",
+      "subtitle": _currentLanguage == 'EN'
+          ? "View a comprehensive list of all diseases"
+          : "அனைத்து நோய்களின் விரிவான பட்டியலைப் பார்க்கவும்",
       "type": "disease",
-      "image":
-          "https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3",
-    },
-    {
-      "id": 3,
-      "title": "Neem",
-      "subtitle": "வேப்பம் - Natural antiseptic",
-      "type": "medicine",
-      "image":
-          "https://images.pexels.com/photos/6627946/pexels-photo-6627946.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-    },
-    {
-      "id": 4,
-      "title": "Arthritis",
-      "subtitle": "கீல்வாதம் - Joint inflammation",
-      "type": "disease",
-      "image":
-          "https://images.unsplash.com/photo-1559757175-0eb30cd8c063?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3",
+      "isUtility": true, // Flag to distinguish it
     },
   ];
 
@@ -101,6 +79,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   void _toggleLanguage() {
     setState(() {
       _currentLanguage = _currentLanguage == 'EN' ? 'TA' : 'EN';
+      // Re-initialize the utility list to update language
+      _diseaseQuickAccess[0]["title"] =
+          _currentLanguage == 'EN' ? "Explore Diseases" : "நோய்களை கண்டறியவும்";
+      _diseaseQuickAccess[0]["subtitle"] = _currentLanguage == 'EN'
+          ? "View a comprehensive list of all diseases"
+          : "அனைத்து நோய்களின் விரிவான பட்டியலைப் பார்க்கவும்";
     });
   }
 
@@ -148,8 +132,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     Navigator.pushNamed(context, '/disease-listing-screen', arguments: disease);
   }
 
+  void _navigateToDiseaseListing() {
+    Navigator.pushNamed(context, '/disease-listing-screen');
+  }
+
   void _onQuickAccessTap(Map<String, dynamic> item) {
-    if (item['type'] == 'medicine') {
+    if (item['isUtility'] == true) {
+      _navigateToDiseaseListing();
+    } else if (item['type'] == 'medicine') {
       _navigateToMedicineDetail(item);
     } else {
       _navigateToDiseaseDetail(item);
@@ -159,14 +149,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // 🌟 CRITICAL FIX: Setting Scaffold background to transparent
-      // allows the global background image (set in main.dart) to show through.
       backgroundColor: Colors.transparent,
       body: SafeArea(
         child: Column(
           children: [
             OfflineIndicatorWidget(isOffline: _isOffline),
-            // ✨ New Professional Header Widget
             _buildHeader(),
             Expanded(
               child: TabBarView(
@@ -186,13 +173,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  // ✨ START: New Professional Header Widget
   Widget _buildHeader() {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 4.w).copyWith(bottom: 2.h),
       decoration: BoxDecoration(
-        // NOTE: The header uses colorScheme.surface, which is fine,
-        // as it adds a necessary contrast bar at the top.
         color: AppTheme.lightTheme.colorScheme.surface,
         boxShadow: [
           BoxShadow(
@@ -264,20 +248,16 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ],
           ),
           SizedBox(height: 2.h),
-          //fake search box
         ],
       ),
     );
   }
-  // ✨ END: New Professional Header Widget
 
   Widget _buildHomeTab() {
     return RefreshIndicator(
       onRefresh: _onRefresh,
       color: AppTheme.lightTheme.primaryColor,
       child: SingleChildScrollView(
-        // Set transparent color for the content wrapper if needed,
-        // but the Scaffold is the main fix.
         physics: const AlwaysScrollableScrollPhysics(),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -289,9 +269,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             SizedBox(height: 3.h),
             BodyPartsExplorerWidget(onTap: _navigateToBodyPartsExplorer),
             SizedBox(height: 2.h),
-            _recentContent.isEmpty
-                ? EducationalTipsWidget(currentLanguage: _currentLanguage)
-                : const SizedBox.shrink(),
+            EducationalTipsWidget(currentLanguage: _currentLanguage),
             SizedBox(height: 2.h),
           ],
         ),
@@ -300,7 +278,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   Widget _buildNavigationCards() {
-    // ... This widget remains unchanged
     return Column(
       children: [
         NavigationCardWidget(
@@ -328,10 +305,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   Widget _buildQuickAccessSection() {
-    // ... This widget remains unchanged
-    if (_recentContent.isEmpty) {
-      return const SizedBox.shrink();
-    }
+    final List<Map<String, dynamic>> allQuickAccessItems = [
+      ..._diseaseQuickAccess,
+    ];
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -348,17 +325,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   color: AppTheme.lightTheme.colorScheme.onSurface,
                 ),
               ),
-              TextButton(
-                onPressed: () {},
-                child: Text(
-                  _currentLanguage == 'EN' ? 'View All' : 'அனைத்தையும் பார்க்க',
-                  style: TextStyle(
-                    fontSize: 12.sp,
-                    fontWeight: FontWeight.w500,
-                    color: AppTheme.lightTheme.primaryColor,
-                  ),
-                ),
-              ),
             ],
           ),
         ),
@@ -368,14 +334,16 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             padding: EdgeInsets.only(left: 4.w),
-            itemCount: _recentContent.length,
+            itemCount: allQuickAccessItems.length,
             itemBuilder: (context, index) {
-              final item = _recentContent[index];
+              final item = allQuickAccessItems[index];
               return QuickAccessCardWidget(
                 title: item['title'],
                 subtitle: item['subtitle'],
                 imageUrl: item['image'],
                 type: item['type'],
+                iconData:
+                    item['isUtility'] == true ? Icons.list_alt_rounded : null,
                 onTap: () => _onQuickAccessTap(item),
               );
             },
@@ -386,39 +354,22 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   Widget _buildSearchTab() {
-    // ... This widget remains unchanged
     return p1();
   }
 
-// Your Books Tab Action Handlers
   Future<void> openPdfFromUrl(String url) async {
     final Uri pdfUri = Uri.parse(url);
     if (await canLaunchUrl(pdfUri)) {
       await launchUrl(pdfUri, mode: LaunchMode.externalApplication);
     } else {
-      // In a real app, you'd show a SnackBar or Dialog here
       debugPrint('Could not launch $url');
     }
   }
 
-  Future<void> downloadPdf(String url, String filename) async {
-    // For a simple app, launching the URL effectively triggers a download/view
-    // depending on the browser/system settings. For actual file download,
-    // you would use a package like dio or flutter_file_downloader.
-    final Uri pdfUri = Uri.parse(url);
-    if (await canLaunchUrl(pdfUri)) {
-      await launchUrl(pdfUri, mode: LaunchMode.externalApplication);
-    } else {
-      debugPrint('Could not launch $url');
-    }
-  }
-
-// ✨ START: REDESIGNED Books Tab Widget
   Widget _buildBooksTab() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Professional Section Header
         Padding(
           padding: EdgeInsets.symmetric(horizontal: 4.w)
               .copyWith(top: 2.h, bottom: 1.h),
@@ -435,7 +386,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           child: ListView(
             padding: EdgeInsets.symmetric(horizontal: 2.w),
             children: [
-              // Example Book Card 1
               _buildBookCard(
                 title: 'Siddha Fundamentals Vol. 1',
                 author: 'Dr. John Doe',
@@ -443,15 +393,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     'https://drive.google.com/file/d/1X-grVKBKgSwkKMNuYYSRQCHGU2nwB-tN/view',
                 iconData: Icons.medical_services_outlined,
               ),
-              // Divider for visual separation
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 4.w),
                 child: Divider(
                     color: AppTheme.lightTheme.colorScheme.outline
                         .withOpacity(0.1)),
               ),
-
-              // Example Book Card 2
               _buildBookCard(
                 title: 'Acupuncture Points Atlas',
                 author: 'Prof. Jane Smith',
@@ -459,15 +406,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     'https://drive.google.com/file/d/1X-grVKBKgSwkKMNuYYSRQCHGU2nwB-tN/view',
                 iconData: Icons.pin_drop_outlined,
               ),
-              // Divider for visual separation
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 4.w),
                 child: Divider(
                     color: AppTheme.lightTheme.colorScheme.outline
                         .withOpacity(0.1)),
               ),
-
-              // Example Book Card 3
               _buildBookCard(
                 title: 'Herbal Remedies for Modern Life',
                 author: 'Ayul Research Team',
@@ -475,15 +419,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     'https://drive.google.com/file/d/1X-grVKBKgSwkKMNuYYSRQCHGU2nwB-tN/view',
                 iconData: Icons.spa_outlined,
               ),
-              // Divider for visual separation
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 4.w),
                 child: Divider(
                     color: AppTheme.lightTheme.colorScheme.outline
                         .withOpacity(0.1)),
               ),
-
-              // Add some padding at the bottom
               SizedBox(height: 3.h),
             ],
           ),
@@ -492,7 +433,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-// Helper widget to build individual book cards (REDESIGNED)
   Widget _buildBookCard({
     required String title,
     required String author,
@@ -501,7 +441,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }) {
     return Card(
       margin: EdgeInsets.symmetric(vertical: 0.5.h, horizontal: 2.w),
-      elevation: 0, // Use subtle elevation or none for a modern flat look
+      elevation: 0,
       color: AppTheme.lightTheme.colorScheme.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
@@ -512,7 +452,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       ),
       child: ListTile(
         contentPadding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 0.5.h),
-        // Leading Icon/Thumbnail
         leading: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
@@ -525,8 +464,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             size: 24,
           ),
         ),
-
-        // Book Details (Title and Author)
         title: Text(
           title,
           style: TextStyle(
@@ -544,14 +481,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
           ),
         ),
-
-        // Trailing Action Button
         trailing: PopupMenuButton<String>(
           onSelected: (String result) {
             if (result == 'open') {
               openPdfFromUrl(pdfUrl);
-            } else if (result == 'download') {
-              downloadPdf(pdfUrl, '$title.pdf');
             }
           },
           itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
@@ -565,32 +498,18 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 ],
               ),
             ),
-            PopupMenuItem<String>(
-              value: 'download',
-              child: Row(
-                children: [
-                  const Icon(Icons.download, size: 20),
-                  SizedBox(width: 2.w),
-                  Text(_currentLanguage == 'EN' ? 'Download' : 'பதிவிறக்க'),
-                ],
-              ),
-            ),
           ],
           icon: Icon(
             Icons.more_vert,
             color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
           ),
         ),
-
-        // Make the whole tile tappable to open the PDF (as a default action)
         onTap: () => openPdfFromUrl(pdfUrl),
       ),
     );
   }
-// ✨ END: REDESIGNED Books Tab Widget
 
   Widget _buildFindDiseaseTab() {
-    // ... This widget remains unchanged
     return DiseaseQuestionnaireWidget(
       currentLanguage: _currentLanguage,
       onMedicineIdentified: (medicine) {
@@ -600,7 +519,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   Widget _buildBottomNavigationBar() {
-    // ... This widget remains unchanged
     return Container(
       padding: EdgeInsets.only(top: 1.h),
       decoration: BoxDecoration(
@@ -654,7 +572,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   Tab _buildTab(
       {required String iconName, required String label, required int index}) {
-    // ... This widget remains unchanged
     final isSelected = _tabController.index == index;
     return Tab(
       icon: CustomIconWidget(

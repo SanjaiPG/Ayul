@@ -46,11 +46,7 @@ class MedicineTabContentWidget extends StatelessWidget {
             color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
           ),
         ),
-        SizedBox(height: 3.h),
-        _buildSectionHeader('Properties'),
         SizedBox(height: 1.h),
-        _buildPropertiesCard(),
-        SizedBox(height: 3.h),
         if (medicineData['scientificName'] != null) ...[
           _buildSectionHeader('Scientific Classification'),
           SizedBox(height: 1.h),
@@ -73,8 +69,6 @@ class MedicineTabContentWidget extends StatelessWidget {
         SizedBox(height: 1.h),
         _buildDosageCard(),
         SizedBox(height: 3.h),
-        _buildSectionHeader('Preparation Instructions'),
-        SizedBox(height: 1.h),
         _buildPreparationSteps(),
         SizedBox(height: 3.h),
         _buildSectionHeader('Administration'),
@@ -173,51 +167,6 @@ class MedicineTabContentWidget extends StatelessWidget {
       style: AppTheme.lightTheme.textTheme.titleLarge?.copyWith(
         fontWeight: FontWeight.w600,
         color: AppTheme.lightTheme.colorScheme.primary,
-      ),
-    );
-  }
-
-  Widget _buildPropertiesCard() {
-    final properties =
-        medicineData['properties'] as Map<String, dynamic>? ?? {};
-    return Card(
-      elevation: 0,
-      color: AppTheme.lightTheme.colorScheme.surfaceVariant.withOpacity(0.5),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: EdgeInsets.all(4.w),
-        child: Column(
-          children: properties.entries.map((entry) {
-            return Padding(
-              padding: EdgeInsets.symmetric(vertical: 0.5.h),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    flex: 2,
-                    child: Text(
-                      entry.key,
-                      style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w500,
-                        color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ),
-                  Text(': ', style: AppTheme.lightTheme.textTheme.bodyMedium),
-                  Expanded(
-                    flex: 3,
-                    child: Text(
-                      entry.value.toString(),
-                      style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
-                        color: AppTheme.lightTheme.colorScheme.onSurface,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }).toList(),
-        ),
       ),
     );
   }

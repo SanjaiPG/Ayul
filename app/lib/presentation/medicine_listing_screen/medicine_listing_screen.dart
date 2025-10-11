@@ -488,11 +488,9 @@ class _MedicineListingScreenState extends State<MedicineListingScreen> {
                     _filterMedicines();
                   });
                 },
-                child: Text(
-                  _currentLanguage == 'Tamil'
-                      ? 'வடிகட்டிகளை அழிக்க'
-                      : 'Clear Filters',
-                ),
+                child: Text(_currentLanguage == 'Tamil'
+                    ? 'வடிகட்டிகளை அழிக்க'
+                    : 'Clear Filters'),
               ),
           ],
         ),

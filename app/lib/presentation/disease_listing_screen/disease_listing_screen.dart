@@ -27,6 +27,17 @@ class _DiseaseListingScreenState extends State<DiseaseListingScreen> {
   // You can reuse FilterChipsRow by passing an empty list for now
   List<Map<String, dynamic>> _activeFilters = [];
 
+  // ADD HELPER METHOD HERE
+  dynamic _getField(
+      Map<String, dynamic> data, List<String> possibleFieldNames) {
+    for (String fieldName in possibleFieldNames) {
+      if (data.containsKey(fieldName)) {
+        return data[fieldName];
+      }
+    }
+    return ''; // Default empty string if no field found
+  }
+
   Future<void> _fetchDiseases() async {
     setState(() => _isLoading = true);
 
@@ -34,17 +45,42 @@ class _DiseaseListingScreenState extends State<DiseaseListingScreen> {
       final snapshot =
           await FirebaseFirestore.instance.collection('Diseases').get();
 
+      // DEBUG: Print all available fields from first document
+      if (snapshot.docs.isNotEmpty) {
+        print('Available fields in first document:');
+        snapshot.docs.first.data().forEach((key, value) {
+          print('$key: $value');
+        });
+      }
+
       _allDiseases = snapshot.docs.map((doc) {
+        final data = doc.data();
         return {
           'id': doc.id,
-          'name': doc['name'] ?? '',
-          'Name_Tamil': doc['Name_Tamil'] ?? '',
-          'description': doc['description'] ?? '',
-          'Description_Tamil': doc['Description_Tamil'] ?? '',
-          'medicines': doc['medicines'] ?? '',
-          'Medicines_Tamil': doc['Medicines_Tamil'] ?? '',
-          'treatments': doc['treatments'] ?? '',
-          'Treatments_Tamil': doc['Treatments_Tamil'] ?? '',
+          'name': data['name'] ?? '',
+          'Name_Tamil': _getField(
+              data, ['Name_Tamil', 'name_tamil', 'nameTamil', 'tamil_name']),
+          'description': data['description'] ?? '',
+          'Description_Tamil': _getField(data, [
+            'Description_Tamil',
+            'description_tamil',
+            'descriptionTamil',
+            'tamil_description'
+          ]),
+          'medicines': data['medicines'] ?? '',
+          'Medicines_Tamil': _getField(data, [
+            'Medicines_Tamil',
+            'medicines_tamil',
+            'medicinesTamil',
+            'tamil_medicines'
+          ]),
+          'treatments': data['treatments'] ?? '',
+          'Treatments_Tamil': _getField(data, [
+            'Treatments_Tamil',
+            'treatments_tamil',
+            'treatmentsTamil',
+            'tamil_treatments'
+          ]),
         };
       }).toList();
 
@@ -186,32 +222,22 @@ class _DiseaseListingScreenState extends State<DiseaseListingScreen> {
       _filteredDiseases = _allDiseases.where((d) {
         if (_searchQuery.isNotEmpty) {
           final q = _searchQuery.toLowerCase();
-          final name = (d['name'] ?? '').toString().toLowerCase();
-          final nameTamil = (d['Name_Tamil'] ?? '').toString().toLowerCase();
-          final desc = (d['description'] ?? '').toString().toLowerCase();
-          final descTamil =
-              (d['Description_Tamil'] ?? '').toString().toLowerCase();
-          final meds = (d['medicines'] ?? '').toString().toLowerCase();
-          final medsTamil =
-              (d['Medicines_Tamil'] ?? '').toString().toLowerCase();
-          final treats = (d['treatments'] ?? '').toString().toLowerCase();
-          final treatsTamil =
-              (d['Treatments_Tamil'] ?? '').toString().toLowerCase();
 
-          if (!(name.contains(q) ||
-              nameTamil.contains(q) ||
-              desc.contains(q) ||
-              descTamil.contains(q) ||
-              meds.contains(q) ||
-              medsTamil.contains(q) ||
-              treats.contains(q) ||
-              treatsTamil.contains(q))) {
-            return false;
-          }
+          // Check all possible fields safely
+          final searchableFields = [
+            d['name']?.toString().toLowerCase() ?? '',
+            d['Name_Tamil']?.toString().toLowerCase() ?? '',
+            d['description']?.toString().toLowerCase() ?? '',
+            d['Description_Tamil']?.toString().toLowerCase() ?? '',
+            d['medicines']?.toString().toLowerCase() ?? '',
+            d['Medicines_Tamil']?.toString().toLowerCase() ?? '',
+            d['treatments']?.toString().toLowerCase() ?? '',
+            d['Treatments_Tamil']?.toString().toLowerCase() ?? '',
+          ];
+
+          // Return true if any field contains the query
+          return searchableFields.any((field) => field.contains(q));
         }
-
-        // any extra filter logic with _activeFilters can be placed here
-
         return true;
       }).toList();
 

@@ -6,7 +6,7 @@ import 'package:sizer/sizer.dart';
 
 import '../core/app_export.dart';
 import '../widgets/custom_error_widget.dart';
-// 🌟 NEW IMPORT
+//  NEW IMPORT
 import '../widgets/app_background.dart';
 
 void main() async {
@@ -18,7 +18,7 @@ void main() async {
 
   bool _hasShownError = false;
 
-  // 🚨 CRITICAL: Custom error handling - DO NOT REMOVE
+  //  CRITICAL: Custom error handling - DO NOT REMOVE
   ErrorWidget.builder = (FlutterErrorDetails details) {
     if (!_hasShownError) {
       _hasShownError = true;
@@ -35,7 +35,7 @@ void main() async {
     return SizedBox.shrink();
   };
 
-  // 🚨 CRITICAL: Device orientation lock - DO NOT REMOVE
+  //  CRITICAL: Device orientation lock - DO NOT REMOVE
   Future.wait([
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
   ]).then((value) {
@@ -52,10 +52,10 @@ class MyApp extends StatelessWidget {
         theme: AppTheme.lightTheme,
         darkTheme: AppTheme.darkTheme,
         themeMode: ThemeMode.light,
-        // 🚨 CRITICAL: NEVER REMOVE OR MODIFY
+        //  CRITICAL: NEVER REMOVE OR MODIFY
         builder: (context, child) {
           return AppBackground(
-            // 🌟 WRAPPING THE APP CONTENT HERE
+            //  WRAPPING THE APP CONTENT HERE
             child: MediaQuery(
               data: MediaQuery.of(context).copyWith(
                 textScaler: TextScaler.linear(1.0),
@@ -64,7 +64,7 @@ class MyApp extends StatelessWidget {
             ),
           );
         },
-        // 🚨 END CRITICAL SECTION
+        //  END CRITICAL SECTION
         debugShowCheckedModeBanner: false,
         routes: AppRoutes.routes,
         initialRoute: AppRoutes.initial,

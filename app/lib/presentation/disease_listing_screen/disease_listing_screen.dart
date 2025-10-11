@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:siddha_acu_edu/presentation/medicine_listing_screen/widgets/filter_chips_row.dart'
+    as medicine;
 import 'package:sizer/sizer.dart';
 
 import '../../core/app_export.dart';
-import './widgets/category_filter_chips_widget.dart';
-import './widgets/context_menu_widget.dart';
-import './widgets/disease_card_widget.dart';
-import './widgets/disease_search_bar_widget.dart';
-import './widgets/filter_bottom_sheet_widget.dart';
+import './widgets/disease_card.dart';
+import './widgets/disease_search_bar.dart';
+import './widgets/filter_chips_row.dart'; // optional reuse of existing widget
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class DiseaseListingScreen extends StatefulWidget {
   const DiseaseListingScreen({Key? key}) : super(key: key);
@@ -17,421 +17,206 @@ class DiseaseListingScreen extends StatefulWidget {
 }
 
 class _DiseaseListingScreenState extends State<DiseaseListingScreen> {
+  String _currentLanguage = 'English';
   String _searchQuery = '';
-  String _selectedCategory = 'All';
-  Map<String, dynamic> _activeFilters = {
-    'bodySystems': <String>[],
-    'severities': <String>[],
-    'sortBy': 'A-Z',
-  };
   bool _isLoading = false;
-  Map<String, dynamic>? _selectedDiseaseForMenu;
 
-  final List<String> _categories = [
-    'All',
-    'Respiratory',
-    'Digestive',
-    'Skin',
-    'Neurological',
-    'Musculoskeletal',
-    'Cardiovascular',
-  ];
+  List<Map<String, dynamic>> _allDiseases = [];
+  List<Map<String, dynamic>> _filteredDiseases = [];
 
-  final List<Map<String, dynamic>> _mockDiseases = [
-    {
-      "id": 1,
-      "name": "Asthma",
-      "tamilName": "இருமல் நோய்",
-      "bodySystems": ["Respiratory"],
-      "symptomCount": 8,
-      "severity": "moderate",
-      "medicineCount": 12,
-      "keySymptoms": [
-        "Shortness of breath",
-        "Wheezing",
-        "Chest tightness",
-        "Persistent cough"
-      ],
-      "description":
-          "A respiratory condition in which airways narrow and swell, making breathing difficult.",
-    },
-    {
-      "id": 2,
-      "name": "Gastritis",
-      "tamilName": "வயிற்று அழற்சி",
-      "bodySystems": ["Digestive"],
-      "symptomCount": 6,
-      "severity": "mild",
-      "medicineCount": 8,
-      "keySymptoms": ["Stomach pain", "Nausea", "Bloating", "Loss of appetite"],
-      "description":
-          "Inflammation of the stomach lining causing digestive discomfort.",
-    },
-    {
-      "id": 3,
-      "name": "Eczema",
-      "tamilName": "தோல் அழற்சி",
-      "bodySystems": ["Skin"],
-      "symptomCount": 5,
-      "severity": "mild",
-      "medicineCount": 15,
-      "keySymptoms": [
-        "Itchy skin",
-        "Red patches",
-        "Dry skin",
-        "Skin inflammation"
-      ],
-      "description":
-          "A condition that makes skin red and itchy, commonly affecting children.",
-    },
-    {
-      "id": 4,
-      "name": "Migraine",
-      "tamilName": "ஒற்றைத் தலைவலி",
-      "bodySystems": ["Neurological"],
-      "symptomCount": 7,
-      "severity": "severe",
-      "medicineCount": 10,
-      "keySymptoms": [
-        "Severe headache",
-        "Nausea",
-        "Light sensitivity",
-        "Visual disturbances"
-      ],
-      "description":
-          "A neurological condition characterized by recurrent headaches.",
-    },
-    {
-      "id": 5,
-      "name": "Arthritis",
-      "tamilName": "மூட்டு வலி",
-      "bodySystems": ["Musculoskeletal"],
-      "symptomCount": 6,
-      "severity": "moderate",
-      "medicineCount": 18,
-      "keySymptoms": [
-        "Joint pain",
-        "Stiffness",
-        "Swelling",
-        "Reduced mobility"
-      ],
-      "description":
-          "Inflammation of one or more joints causing pain and stiffness.",
-    },
-    {
-      "id": 6,
-      "name": "Hypertension",
-      "tamilName": "உயர் இரத்த அழுத்தம்",
-      "bodySystems": ["Cardiovascular"],
-      "symptomCount": 4,
-      "severity": "severe",
-      "medicineCount": 14,
-      "keySymptoms": [
-        "High blood pressure",
-        "Headaches",
-        "Dizziness",
-        "Chest pain"
-      ],
-      "description":
-          "A condition where blood pressure in arteries is persistently elevated.",
-    },
-    {
-      "id": 7,
-      "name": "Bronchitis",
-      "tamilName": "மூச்சுக்குழாய் அழற்சி",
-      "bodySystems": ["Respiratory"],
-      "symptomCount": 5,
-      "severity": "moderate",
-      "medicineCount": 9,
-      "keySymptoms": [
-        "Persistent cough",
-        "Mucus production",
-        "Fatigue",
-        "Shortness of breath"
-      ],
-      "description":
-          "Inflammation of the lining of bronchial tubes in the lungs.",
-    },
-    {
-      "id": 8,
-      "name": "Peptic Ulcer",
-      "tamilName": "வயிற்றுப் புண்",
-      "bodySystems": ["Digestive"],
-      "symptomCount": 7,
-      "severity": "moderate",
-      "medicineCount": 11,
-      "keySymptoms": [
-        "Stomach pain",
-        "Heartburn",
-        "Nausea",
-        "Loss of appetite"
-      ],
-      "description":
-          "Open sores that develop on the inside lining of stomach and upper small intestine.",
-    },
-  ];
+  // You can reuse FilterChipsRow by passing an empty list for now
+  List<Map<String, dynamic>> _activeFilters = [];
 
-  List<Map<String, dynamic>> get _filteredDiseases {
-    List<Map<String, dynamic>> filtered = List.from(_mockDiseases);
+  Future<void> _fetchDiseases() async {
+    setState(() => _isLoading = true);
 
-    // Apply search filter
-    if (_searchQuery.isNotEmpty) {
-      filtered = filtered.where((disease) {
-        final name = disease['name'].toString().toLowerCase();
-        final tamilName = disease['tamilName'].toString().toLowerCase();
-        final symptoms =
-            (disease['keySymptoms'] as List).join(' ').toLowerCase();
-        final query = _searchQuery.toLowerCase();
+    try {
+      final snapshot =
+          await FirebaseFirestore.instance.collection('Diseases').get();
 
-        return name.contains(query) ||
-            tamilName.contains(query) ||
-            symptoms.contains(query);
+      _allDiseases = snapshot.docs.map((doc) {
+        return {
+          'id': doc.id,
+          'name': doc['name'] ?? '',
+          'Name_Tamil': doc['Name_Tamil'] ?? '',
+          'description': doc['description'] ?? '',
+          'Description_Tamil': doc['Description_Tamil'] ?? '',
+          'medicines': doc['medicines'] ?? '',
+          'Medicines_Tamil': doc['Medicines_Tamil'] ?? '',
+          'treatments': doc['treatments'] ?? '',
+          'Treatments_Tamil': doc['Treatments_Tamil'] ?? '',
+        };
       }).toList();
+
+      _filteredDiseases = List.from(_allDiseases);
+
+      // debug
+      print('Fetched ${_allDiseases.length} diseases');
+      if (_allDiseases.isNotEmpty) print('First disease: ${_allDiseases[0]}');
+    } catch (e) {
+      print('Error fetching diseases: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error loading diseases: $e')),
+        );
+      }
     }
 
-    // Apply category filter
-    if (_selectedCategory != 'All') {
-      filtered = filtered.where((disease) {
-        final bodySystems = disease['bodySystems'] as List;
-        return bodySystems.contains(_selectedCategory);
-      }).toList();
-    }
-
-    // Apply advanced filters
-    final List<String> bodySystemFilters =
-        _activeFilters['bodySystems'] as List<String>;
-    if (bodySystemFilters.isNotEmpty) {
-      filtered = filtered.where((disease) {
-        final bodySystems = disease['bodySystems'] as List;
-        return bodySystemFilters.any((filter) => bodySystems.contains(filter));
-      }).toList();
-    }
-
-    final List<String> severityFilters =
-        _activeFilters['severities'] as List<String>;
-    if (severityFilters.isNotEmpty) {
-      filtered = filtered.where((disease) {
-        final severity = disease['severity'].toString();
-        return severityFilters
-            .any((filter) => severity.toLowerCase() == filter.toLowerCase());
-      }).toList();
-    }
-
-    // Apply sorting
-    final String sortBy = _activeFilters['sortBy'] as String;
-    switch (sortBy) {
-      case 'A-Z':
-        filtered.sort(
-            (a, b) => a['name'].toString().compareTo(b['name'].toString()));
-        break;
-      case 'Z-A':
-        filtered.sort(
-            (a, b) => b['name'].toString().compareTo(a['name'].toString()));
-        break;
-      case 'Severity':
-        final severityOrder = {'mild': 1, 'moderate': 2, 'severe': 3};
-        filtered.sort((a, b) {
-          final aSeverity =
-              severityOrder[a['severity'].toString().toLowerCase()] ?? 0;
-          final bSeverity =
-              severityOrder[b['severity'].toString().toLowerCase()] ?? 0;
-          return bSeverity.compareTo(aSeverity);
-        });
-        break;
-      case 'Most Common':
-        filtered.sort((a, b) =>
-            (b['medicineCount'] as int).compareTo(a['medicineCount'] as int));
-        break;
-    }
-
-    return filtered;
+    setState(() => _isLoading = false);
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppTheme.lightTheme.scaffoldBackgroundColor,
-      appBar: _buildAppBar(),
-      body: Stack(
-        children: [
-          Column(
-            children: [
-              // Search Bar
-              DiseaseSearchBarWidget(
-                onSearchChanged: (query) {
-                  setState(() {
-                    _searchQuery = query;
-                  });
-                },
-                onFilterPressed: _showFilterBottomSheet,
-              ),
+  void initState() {
+    super.initState();
+    _fetchDiseases();
+  }
 
-              // Category Filter Chips
-              CategoryFilterChipsWidget(
-                categories: _categories,
-                selectedCategory: _selectedCategory,
-                onCategorySelected: (category) {
-                  setState(() {
-                    _selectedCategory = category;
-                  });
-                },
-              ),
+  void _onSearchChanged(String query) {
+    setState(() {
+      _searchQuery = query;
+      _filterDiseases();
+    });
+  }
 
-              // Disease List
-              Expanded(
-                child: _isLoading
-                    ? _buildLoadingState()
-                    : _filteredDiseases.isEmpty
-                        ? _buildEmptyState()
-                        : RefreshIndicator(
-                            onRefresh: _refreshDiseases,
-                            color: AppTheme.lightTheme.colorScheme.primary,
-                            child: ListView.builder(
-                              padding: EdgeInsets.only(bottom: 2.h),
-                              itemCount: _filteredDiseases.length,
-                              itemBuilder: (context, index) {
-                                final disease = _filteredDiseases[index];
-                                return DiseaseCardWidget(
-                                  disease: disease,
-                                  onTap: () =>
-                                      _navigateToDiseaseDetail(disease),
-                                  onLongPress: () => _showContextMenu(disease),
-                                );
-                              },
-                            ),
-                          ),
-              ),
-            ],
-          ),
+  void _onVoiceSearch() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          _currentLanguage == 'Tamil'
+              ? 'குரல் தேடல் விரைவில் வரும்'
+              : 'Voice search coming soon',
+        ),
+      ),
+    );
+  }
 
-          // Context Menu Overlay
-          if (_selectedDiseaseForMenu != null)
-            ContextMenuWidget(
-              disease: _selectedDiseaseForMenu!,
-              onAddToWatchlist: () => _addToWatchlist(_selectedDiseaseForMenu!),
-              onShare: () => _shareDisease(_selectedDiseaseForMenu!),
-              onViewTreatments: () => _viewTreatments(_selectedDiseaseForMenu!),
-              onDismiss: () {
-                setState(() {
-                  _selectedDiseaseForMenu = null;
-                });
+  void _onDiseaseTap(Map<String, dynamic> disease) {
+    Navigator.pushNamed(context, '/disease-detail-screen', arguments: disease);
+  }
+
+  void _onDiseaseLongPress(Map<String, dynamic> disease) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => Container(
+        padding: EdgeInsets.all(4.w),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: CustomIconWidget(
+                iconName: 'share',
+                color: AppTheme.lightTheme.primaryColor,
+                size: 6.w,
+              ),
+              title: Text(_currentLanguage == 'Tamil' ? 'பகிர்' : 'Share'),
+              onTap: () {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(_currentLanguage == 'Tamil'
+                        ? 'பகிர்வு விரைவில் வரும்'
+                        : 'Share feature coming soon'),
+                  ),
+                );
               },
             ),
-        ],
+            ListTile(
+              leading: CustomIconWidget(
+                iconName: 'local_hospital',
+                color: AppTheme.lightTheme.primaryColor,
+                size: 6.w,
+              ),
+              title: Text(_currentLanguage == 'Tamil'
+                  ? 'மருத்துவ குறிப்புகள்'
+                  : 'View Medical Notes'),
+              onTap: () {
+                Navigator.pop(context);
+                // Implement navigation if you have a specific screen
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  PreferredSizeWidget _buildAppBar() {
-    return AppBar(
-      title: Text(
-        'Diseases',
-        style: AppTheme.lightTheme.textTheme.titleLarge?.copyWith(
-          fontWeight: FontWeight.w600,
-          color: AppTheme.lightTheme.colorScheme.onPrimary,
+  void _toggleLanguage() {
+    setState(() {
+      _currentLanguage = _currentLanguage == 'English' ? 'Tamil' : 'English';
+    });
+  }
+
+  void _showFilterPlaceholder() {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => Container(
+        padding: EdgeInsets.all(4.w),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              _currentLanguage == 'Tamil' ? 'வடிகட்டிகள்' : 'Filters',
+              style: AppTheme.lightTheme.textTheme.titleMedium,
+            ),
+            SizedBox(height: 2.h),
+            Text(
+              _currentLanguage == 'Tamil'
+                  ? 'வடிகட்டிகள் விரைவில் வரும்'
+                  : 'Filters coming soon',
+              style: AppTheme.lightTheme.textTheme.bodyMedium
+                  ?.copyWith(height: 1.4),
+            ),
+            SizedBox(height: 2.h),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(_currentLanguage == 'Tamil' ? 'மீட்க' : 'Close'),
+            ),
+          ],
         ),
       ),
-      backgroundColor: AppTheme.lightTheme.colorScheme.primary,
-      foregroundColor: AppTheme.lightTheme.colorScheme.onPrimary,
-      elevation: 0,
-      actions: [
-        IconButton(
-          onPressed: () {
-            // Navigate to global search
-            Fluttertoast.showToast(
-              msg: "Global search feature coming soon",
-              toastLength: Toast.LENGTH_SHORT,
-              gravity: ToastGravity.BOTTOM,
-            );
-          },
-          icon: CustomIconWidget(
-            iconName: 'search',
-            color: AppTheme.lightTheme.colorScheme.onPrimary,
-            size: 6.w,
-          ),
-        ),
-        IconButton(
-          onPressed: () {
-            // Toggle language
-            Fluttertoast.showToast(
-              msg: "Language toggle feature coming soon",
-              toastLength: Toast.LENGTH_SHORT,
-              gravity: ToastGravity.BOTTOM,
-            );
-          },
-          icon: CustomIconWidget(
-            iconName: 'language',
-            color: AppTheme.lightTheme.colorScheme.onPrimary,
-            size: 6.w,
-          ),
-        ),
-      ],
     );
   }
 
-  Widget _buildLoadingState() {
-    return ListView.builder(
-      padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
-      itemCount: 6,
-      itemBuilder: (context, index) {
-        return Container(
-          margin: EdgeInsets.only(bottom: 2.h),
-          height: 20.h,
-          decoration: BoxDecoration(
-            color: AppTheme.lightTheme.colorScheme.surface,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.05),
-                blurRadius: 8,
-                offset: Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: EdgeInsets.all(4.w),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      height: 2.h,
-                      width: 60.w,
-                      decoration: BoxDecoration(
-                        color: Colors.grey.withValues(alpha: 0.3),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                    ),
-                    SizedBox(height: 1.h),
-                    Container(
-                      height: 1.5.h,
-                      width: 40.w,
-                      decoration: BoxDecoration(
-                        color: Colors.grey.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Spacer(),
-              Container(
-                height: 6.h,
-                decoration: BoxDecoration(
-                  color: Colors.grey.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.only(
-                    bottomLeft: Radius.circular(12),
-                    bottomRight: Radius.circular(12),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
+  Future<void> _onRefresh() async {
+    await _fetchDiseases();
+  }
+
+  void _filterDiseases() {
+    setState(() {
+      _filteredDiseases = _allDiseases.where((d) {
+        if (_searchQuery.isNotEmpty) {
+          final q = _searchQuery.toLowerCase();
+          final name = (d['name'] ?? '').toString().toLowerCase();
+          final nameTamil = (d['Name_Tamil'] ?? '').toString().toLowerCase();
+          final desc = (d['description'] ?? '').toString().toLowerCase();
+          final descTamil =
+              (d['Description_Tamil'] ?? '').toString().toLowerCase();
+          final meds = (d['medicines'] ?? '').toString().toLowerCase();
+          final medsTamil =
+              (d['Medicines_Tamil'] ?? '').toString().toLowerCase();
+          final treats = (d['treatments'] ?? '').toString().toLowerCase();
+          final treatsTamil =
+              (d['Treatments_Tamil'] ?? '').toString().toLowerCase();
+
+          if (!(name.contains(q) ||
+              nameTamil.contains(q) ||
+              desc.contains(q) ||
+              descTamil.contains(q) ||
+              meds.contains(q) ||
+              medsTamil.contains(q) ||
+              treats.contains(q) ||
+              treatsTamil.contains(q))) {
+            return false;
+          }
+        }
+
+        // any extra filter logic with _activeFilters can be placed here
+
+        return true;
+      }).toList();
+
+      print('Filtered diseases: ${_filteredDiseases.length}');
+    });
   }
 
   Widget _buildEmptyState() {
@@ -448,36 +233,23 @@ class _DiseaseListingScreenState extends State<DiseaseListingScreen> {
             ),
             SizedBox(height: 3.h),
             Text(
-              'No diseases found',
+              _currentLanguage == 'Tamil'
+                  ? 'நோய்கள் கிடைக்கவில்லை'
+                  : 'No diseases found',
               style: AppTheme.lightTheme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: AppTheme.lightTheme.colorScheme.onSurface,
+                color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.w500,
               ),
             ),
             SizedBox(height: 1.h),
             Text(
-              _searchQuery.isNotEmpty
-                  ? 'Try adjusting your search terms or filters'
-                  : 'No diseases match your current filters',
+              _currentLanguage == 'Tamil'
+                  ? 'வேறு தேடல் சொற்களை முயற்சிக்கவும்'
+                  : 'Try different search terms',
               style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
                 color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
               ),
               textAlign: TextAlign.center,
-            ),
-            SizedBox(height: 3.h),
-            ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  _searchQuery = '';
-                  _selectedCategory = 'All';
-                  _activeFilters = {
-                    'bodySystems': <String>[],
-                    'severities': <String>[],
-                    'sortBy': 'A-Z',
-                  };
-                });
-              },
-              child: Text('Clear Filters'),
             ),
           ],
         ),
@@ -485,79 +257,105 @@ class _DiseaseListingScreenState extends State<DiseaseListingScreen> {
     );
   }
 
-  void _showFilterBottomSheet() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => FilterBottomSheetWidget(
-        currentFilters: _activeFilters,
-        onFiltersApplied: (filters) {
-          setState(() {
-            _activeFilters = filters;
-          });
-        },
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppTheme.lightTheme.scaffoldBackgroundColor,
+      appBar: AppBar(
+        backgroundColor: AppTheme.lightTheme.primaryColor,
+        foregroundColor: AppTheme.lightTheme.colorScheme.onPrimary,
+        title: Text(
+          _currentLanguage == 'Tamil' ? 'நோய்கள்' : 'Diseases',
+          style: AppTheme.lightTheme.textTheme.titleLarge?.copyWith(
+            color: AppTheme.lightTheme.colorScheme.onPrimary,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        leading: IconButton(
+          onPressed: () => Navigator.pop(context),
+          icon: CustomIconWidget(
+            iconName: 'arrow_back',
+            color: AppTheme.lightTheme.colorScheme.onPrimary,
+            size: 6.w,
+          ),
+        ),
+        actions: [
+          IconButton(
+            onPressed: _toggleLanguage,
+            icon: CustomIconWidget(
+              iconName: 'language',
+              color: AppTheme.lightTheme.colorScheme.onPrimary,
+              size: 6.w,
+            ),
+          ),
+          IconButton(
+            onPressed: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(_currentLanguage == 'Tamil'
+                      ? 'உலகளாவிய தேடல் விரைவில் வரும்'
+                      : 'Global search coming soon'),
+                ),
+              );
+            },
+            icon: CustomIconWidget(
+              iconName: 'search',
+              color: AppTheme.lightTheme.colorScheme.onPrimary,
+              size: 6.w,
+            ),
+          ),
+        ],
+      ),
+      body: Column(
+        children: [
+          DiseaseSearchBar(
+            onSearchChanged: _onSearchChanged,
+            onVoiceSearch: _onVoiceSearch,
+            currentLanguage: _currentLanguage,
+          ),
+          // Reuse the FilterChipsRow if you want to show active filter chips (we pass empty for now)
+          FilterChipsRow(
+            activeFilters: _activeFilters,
+            onFilterRemoved: (id) {},
+            currentLanguage: _currentLanguage,
+          ),
+          Expanded(
+            child: _isLoading
+                ? Center(
+                    child: CircularProgressIndicator(
+                      color: AppTheme.lightTheme.primaryColor,
+                    ),
+                  )
+                : _filteredDiseases.isEmpty
+                    ? _buildEmptyState()
+                    : RefreshIndicator(
+                        onRefresh: _onRefresh,
+                        color: AppTheme.lightTheme.primaryColor,
+                        child: ListView.builder(
+                          padding: EdgeInsets.only(bottom: 10.h),
+                          itemCount: _filteredDiseases.length,
+                          itemBuilder: (context, index) {
+                            return DiseaseCard(
+                              disease: _filteredDiseases[index],
+                              currentLanguage: _currentLanguage,
+                              onTap: _onDiseaseTap,
+                              onLongPress: _onDiseaseLongPress,
+                            );
+                          },
+                        ),
+                      ),
+          ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _showFilterPlaceholder,
+        backgroundColor: AppTheme.lightTheme.primaryColor,
+        child: CustomIconWidget(
+          iconName: 'filter_list',
+          color: AppTheme.lightTheme.colorScheme.onPrimary,
+          size: 6.w,
+        ),
       ),
     );
-  }
-
-  void _showContextMenu(Map<String, dynamic> disease) {
-    setState(() {
-      _selectedDiseaseForMenu = disease;
-    });
-  }
-
-  Future<void> _refreshDiseases() async {
-    setState(() {
-      _isLoading = true;
-    });
-
-    // Simulate API call
-    await Future.delayed(Duration(seconds: 1));
-
-    setState(() {
-      _isLoading = false;
-    });
-
-    Fluttertoast.showToast(
-      msg: "Disease database updated",
-      toastLength: Toast.LENGTH_SHORT,
-      gravity: ToastGravity.BOTTOM,
-    );
-  }
-
-  void _navigateToDiseaseDetail(Map<String, dynamic> disease) {
-    // Navigate to disease detail screen
-    Fluttertoast.showToast(
-      msg: "Navigating to ${disease['name']} details",
-      toastLength: Toast.LENGTH_SHORT,
-      gravity: ToastGravity.BOTTOM,
-    );
-    // Navigator.pushNamed(context, '/disease-detail-screen', arguments: disease);
-  }
-
-  void _addToWatchlist(Map<String, dynamic> disease) {
-    Fluttertoast.showToast(
-      msg: "${disease['name']} added to watchlist",
-      toastLength: Toast.LENGTH_SHORT,
-      gravity: ToastGravity.BOTTOM,
-    );
-  }
-
-  void _shareDisease(Map<String, dynamic> disease) {
-    Fluttertoast.showToast(
-      msg: "Sharing ${disease['name']} information",
-      toastLength: Toast.LENGTH_SHORT,
-      gravity: ToastGravity.BOTTOM,
-    );
-  }
-
-  void _viewTreatments(Map<String, dynamic> disease) {
-    Fluttertoast.showToast(
-      msg: "Viewing treatments for ${disease['name']}",
-      toastLength: Toast.LENGTH_SHORT,
-      gravity: ToastGravity.BOTTOM,
-    );
-    // Navigator.pushNamed(context, '/medicine-listing-screen', arguments: {'diseaseId': disease['id']});
   }
 }

@@ -48,7 +48,7 @@ class _MedicineDetailScreenState extends State<MedicineDetailScreen>
       "englishName": firestoreData['Name'] ?? 'Unknown Medicine',
       "tamilName": firestoreData['Name_Tamil'] ?? '',
       "pronunciation": firestoreData['Pronunciation'] ?? '',
-      "images": _parseImages(firestoreData['Imagssse']),
+      "images": _parseImages(firestoreData['Image']),
       "description": firestoreData['Description'] ?? 'No description available',
       "description_tamil": firestoreData['Description_Tamil'] ?? '',
       "scientificName": firestoreData['Scientific_Name'] ?? 'N/A',

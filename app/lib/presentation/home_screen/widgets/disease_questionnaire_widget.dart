@@ -368,6 +368,7 @@ class _DiseaseQuestionnaireWidgetState
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
+          backgroundColor: Colors.white,
           title: Text(
             widget.currentLanguage == 'EN'
                 ? 'Assessment Results'

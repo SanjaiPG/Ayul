@@ -13,6 +13,10 @@ import './widgets/quick_access_card_widget.dart';
 import './widgets/disease_questionnaire_widget.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+// Assuming CustomIconWidget is defined elsewhere, but we use Material Icons
+// directly in the updated Book tab for simplicity, though the bottom bar still
+// uses CustomIconWidget.
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
@@ -184,7 +188,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  // ✨ START: New Professional Header Widget
   Widget _buildHeader() {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 4.w).copyWith(bottom: 2.h),
@@ -260,12 +263,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ],
           ),
           SizedBox(height: 2.h),
-          //fake search box
         ],
       ),
     );
   }
-  // ✨ END: New Professional Header Widget
 
   Widget _buildHomeTab() {
     return RefreshIndicator(
@@ -384,13 +385,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     return p1();
   }
 
-// Your Books Tab Widget
+// Your Books Tab Action Handlers
   Future<void> openPdfFromUrl(String url) async {
     final Uri pdfUri = Uri.parse(url);
     if (await canLaunchUrl(pdfUri)) {
       await launchUrl(pdfUri, mode: LaunchMode.externalApplication);
     } else {
-      throw 'Could not launch $url';
+      // In a real app, you'd show a SnackBar or Dialog here
+      debugPrint('Could not launch $url');
     }
   }
 
@@ -399,149 +401,184 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     if (await canLaunchUrl(pdfUri)) {
       await launchUrl(pdfUri, mode: LaunchMode.externalApplication);
     } else {
-      throw 'Could not launch $url';
+      debugPrint('Could not launch $url');
     }
   }
 
-// Your Books Tab Widget
+// ✨ START: REDESIGNED Books Tab Widget
   Widget _buildBooksTab() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'My Books Collection',
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 4.w)
+              .copyWith(top: 2.h, bottom: 1.h),
+          child: Text(
+            _currentLanguage == 'EN' ? '' : '',
             style: TextStyle(
-              fontSize: 24,
+              fontSize: 1.sp,
               fontWeight: FontWeight.bold,
+              color: AppTheme.lightTheme.colorScheme.onSurface,
             ),
           ),
-          const SizedBox(height: 20),
+        ),
+        Expanded(
+          child: ListView(
+            padding: EdgeInsets.symmetric(horizontal: 2.w),
+            children: [
+              // Example Book Card 1
+              _buildBookCard(
+                title: 'Siddha Fundamentals Vol. 1',
+                author: 'Dr. John Doe',
+                pdfUrl:
+                    'https://drive.google.com/file/d/1X-grVKBKgSwkKMNuYYSRQCHGU2nwB-tN/view',
+                iconData: Icons.medical_services_outlined,
+              ),
+              // Divider for visual separation
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 4.w),
+                child: Divider(
+                    color: AppTheme.lightTheme.colorScheme.outline
+                        .withOpacity(0.1)),
+              ),
 
-          // Example Book Card 1
-          _buildBookCard(
-            title: 'A 1',
-            author: 'John Doe',
-            pdfUrl:
-                'https://drive.google.com/file/d/1X-grVKBKgSwkKMNuYYSRQCHGU2nwB-tN/view',
-            coverColor: Colors.blue,
+              // Example Book Card 2
+              _buildBookCard(
+                title: 'Acupuncture Points Atlas',
+                author: 'Prof. Jane Smith',
+                pdfUrl:
+                    'https://drive.google.com/file/d/1X-grVKBKgSwkKMNuYYSRQCHGU2nwB-tN/view',
+                iconData: Icons.pin_drop_outlined,
+              ),
+              // Divider for visual separation
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 4.w),
+                child: Divider(
+                    color: AppTheme.lightTheme.colorScheme.outline
+                        .withOpacity(0.1)),
+              ),
+
+              // Example Book Card 3
+              _buildBookCard(
+                title: 'Herbal Remedies for Modern Life',
+                author: 'Ayul Research Team',
+                pdfUrl:
+                    'https://drive.google.com/file/d/1X-grVKBKgSwkKMNuYYSRQCHGU2nwB-tN/view',
+                iconData: Icons.spa_outlined,
+              ),
+              // Divider for visual separation
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 4.w),
+                child: Divider(
+                    color: AppTheme.lightTheme.colorScheme.outline
+                        .withOpacity(0.1)),
+              ),
+
+              // Add some padding at the bottom
+              SizedBox(height: 3.h),
+            ],
           ),
-
-          const SizedBox(height: 16),
-
-          // Example Book Card 2
-          _buildBookCard(
-            title: 'A 2',
-            author: 'Jane Smith',
-            pdfUrl:
-                'https://drive.google.com/file/d/1X-grVKBKgSwkKMNuYYSRQCHGU2nwB-tN/view',
-            coverColor: Colors.green,
-          ),
-
-          const SizedBox(height: 16),
-
-          // Example Book Card 3
-          _buildBookCard(
-            title: 'A 3',
-            author: 'Bob Johnson',
-            pdfUrl:
-                'https://drive.google.com/file/d/1X-grVKBKgSwkKMNuYYSRQCHGU2nwB-tN/view',
-            coverColor: Colors.orange,
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
-// Helper widget to build individual book cards
+// Helper widget to build individual book cards (REDESIGNED)
   Widget _buildBookCard({
     required String title,
     required String author,
     required String pdfUrl,
-    required Color coverColor,
+    required IconData iconData,
   }) {
     return Card(
-      elevation: 3,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Row(
-          children: [
-            // Book Cover Thumbnail
-            Container(
-              width: 80,
-              height: 100,
-              decoration: BoxDecoration(
-                color: coverColor,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Icon(
-                Icons.book,
-                color: Colors.white,
-                size: 40,
+      margin: EdgeInsets.symmetric(vertical: 0.5.h, horizontal: 2.w),
+      elevation: 0, // Use subtle elevation or none for a modern flat look
+      color: AppTheme.lightTheme.colorScheme.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+        side: BorderSide(
+          color: AppTheme.lightTheme.colorScheme.outline.withOpacity(0.15),
+          width: 1,
+        ),
+      ),
+      child: ListTile(
+        contentPadding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 0.5.h),
+        // Leading Icon/Thumbnail
+        leading: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: AppTheme.lightTheme.colorScheme.primary.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: Icon(
+            iconData,
+            color: AppTheme.lightTheme.colorScheme.primary,
+            size: 24,
+          ),
+        ),
+
+        // Book Details (Title and Author)
+        title: Text(
+          title,
+          style: TextStyle(
+            fontSize: 13.sp,
+            fontWeight: FontWeight.w600,
+            color: AppTheme.lightTheme.colorScheme.onSurface,
+          ),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+        ),
+        subtitle: Text(
+          author,
+          style: TextStyle(
+            fontSize: 10.sp,
+            color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+
+        // Trailing Action Button
+        trailing: PopupMenuButton<String>(
+          onSelected: (String result) {
+            if (result == 'open') {
+              openPdfFromUrl(pdfUrl);
+            } else if (result == 'download') {
+              downloadPdf(pdfUrl, '$title.pdf');
+            }
+          },
+          itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+            PopupMenuItem<String>(
+              value: 'open',
+              child: Row(
+                children: [
+                  const Icon(Icons.open_in_new, size: 20),
+                  SizedBox(width: 2.w),
+                  Text(_currentLanguage == 'EN' ? 'Open' : 'திறக்க'),
+                ],
               ),
             ),
-
-            const SizedBox(width: 16),
-
-            // Book Details
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+            PopupMenuItem<String>(
+              value: 'download',
+              child: Row(
                 children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    author,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-
-                  // Action Buttons
-                  Wrap(
-                    spacing: 8,
-                    children: [
-                      ElevatedButton.icon(
-                        onPressed: () => openPdfFromUrl(pdfUrl),
-                        icon: const Icon(Icons.open_in_new, size: 16),
-                        label: const Text('Open'),
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 8,
-                          ),
-                        ),
-                      ),
-                      OutlinedButton.icon(
-                        onPressed: () => downloadPdf(pdfUrl, '$title.pdf'),
-                        icon: const Icon(Icons.download, size: 16),
-                        label: const Text('Download'),
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 8,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                  const Icon(Icons.download, size: 20),
+                  SizedBox(width: 2.w),
+                  Text(_currentLanguage == 'EN' ? 'Download' : 'பதிவிறக்க'),
                 ],
               ),
             ),
           ],
+          icon: Icon(
+            Icons.more_vert,
+            color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+          ),
         ),
+
+        // Make the whole tile tappable to open the PDF (as a default action)
+        onTap: () => openPdfFromUrl(pdfUrl),
       ),
     );
   }
+// ✨ END: REDESIGNED Books Tab Widget
 
   Widget _buildFindDiseaseTab() {
     // ... This widget remains unchanged
@@ -608,7 +645,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   Tab _buildTab(
       {required String iconName, required String label, required int index}) {
-    // ... This widget remains unchanged
     final isSelected = _tabController.index == index;
     return Tab(
       icon: CustomIconWidget(

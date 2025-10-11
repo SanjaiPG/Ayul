@@ -13,10 +13,6 @@ import './widgets/quick_access_card_widget.dart';
 import './widgets/disease_questionnaire_widget.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-// Assuming CustomIconWidget is defined elsewhere, but we use Material Icons
-// directly in the updated Book tab for simplicity, though the bottom bar still
-// uses CustomIconWidget.
-
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
@@ -163,7 +159,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.lightTheme.scaffoldBackgroundColor,
+      // 🌟 CRITICAL FIX: Setting Scaffold background to transparent
+      // allows the global background image (set in main.dart) to show through.
+      backgroundColor: Colors.transparent,
       body: SafeArea(
         child: Column(
           children: [
@@ -188,10 +186,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
+  // ✨ START: New Professional Header Widget
   Widget _buildHeader() {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 4.w).copyWith(bottom: 2.h),
       decoration: BoxDecoration(
+        // NOTE: The header uses colorScheme.surface, which is fine,
+        // as it adds a necessary contrast bar at the top.
         color: AppTheme.lightTheme.colorScheme.surface,
         boxShadow: [
           BoxShadow(
@@ -263,16 +264,20 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ],
           ),
           SizedBox(height: 2.h),
+          //fake search box
         ],
       ),
     );
   }
+  // ✨ END: New Professional Header Widget
 
   Widget _buildHomeTab() {
     return RefreshIndicator(
       onRefresh: _onRefresh,
       color: AppTheme.lightTheme.primaryColor,
       child: SingleChildScrollView(
+        // Set transparent color for the content wrapper if needed,
+        // but the Scaffold is the main fix.
         physics: const AlwaysScrollableScrollPhysics(),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -397,6 +402,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   Future<void> downloadPdf(String url, String filename) async {
+    // For a simple app, launching the URL effectively triggers a download/view
+    // depending on the browser/system settings. For actual file download,
+    // you would use a package like dio or flutter_file_downloader.
     final Uri pdfUri = Uri.parse(url);
     if (await canLaunchUrl(pdfUri)) {
       await launchUrl(pdfUri, mode: LaunchMode.externalApplication);
@@ -410,13 +418,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Professional Section Header
         Padding(
           padding: EdgeInsets.symmetric(horizontal: 4.w)
               .copyWith(top: 2.h, bottom: 1.h),
           child: Text(
-            _currentLanguage == 'EN' ? '' : '',
+            _currentLanguage == 'EN' ? 'Resource Library' : 'நூல் தொகுப்பு',
             style: TextStyle(
-              fontSize: 1.sp,
+              fontSize: 18.sp,
               fontWeight: FontWeight.bold,
               color: AppTheme.lightTheme.colorScheme.onSurface,
             ),
@@ -645,6 +654,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   Tab _buildTab(
       {required String iconName, required String label, required int index}) {
+    // ... This widget remains unchanged
     final isSelected = _tabController.index == index;
     return Tab(
       icon: CustomIconWidget(
